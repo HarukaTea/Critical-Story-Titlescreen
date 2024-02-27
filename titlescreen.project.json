@@ -4,7 +4,7 @@
         "$className": "DataModel",
         "ReplicatedFirst": {
             "LoadingScreen": {
-                "$path": "src/LoadingScreen.client.lua"
+                "$path": "src/LoadingScreen.client.luau"
             }
         },
         "ReplicatedStorage": {
@@ -19,12 +19,12 @@
         "StarterPlayer": {
             "StarterPlayerScripts": {
                 "RbxCharacterSounds": {
-                    "$path": "src/RbxCharacterSounds.client.lua"
+                    "$path": "src/RbxCharacterSounds.client.luau"
                 }
             },
             "StarterCharacterScripts": {
                 "Health": {
-                    "$path": "src/Health.server.lua"
+                    "$path": "src/Health.server.luau"
                 }
             },
             "$properties": {
