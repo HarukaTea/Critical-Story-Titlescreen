@@ -18,14 +18,10 @@
         },
         "StarterPlayer": {
             "StarterPlayerScripts": {
-                "RbxCharacterSounds": {
-                    "$path": "src/RbxCharacterSounds.client.luau"
-                }
+                "$path": "src/client"
             },
             "StarterCharacterScripts": {
-                "Health": {
-                    "$path": "src/Health.server.luau"
-                }
+                "$path": "src/character"
             },
             "$properties": {
                 "CameraMaxZoomDistance": 64,

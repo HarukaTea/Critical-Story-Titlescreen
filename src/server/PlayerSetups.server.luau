@@ -1,9 +1,10 @@
 --!nocheck
+--!optimize 2
+--!native
 
 local Players = game:GetService("Players")
 local RepS = game:GetService("ReplicatedStorage")
 local SSS = game:GetService("ServerScriptService")
-local SS = game:GetService("ServerStorage")
 
 local Events = require(SSS.Modules.Data.ServerEvents)
 local Spawn = require(RepS.Modules.Packages.Spawn)
@@ -11,44 +12,53 @@ local SuphiDataStore = require(RepS.Modules.Packages.SuphiDataStore)
 
 local wait = task.wait
 
-local TEMPLATE = {
-	Stats = {
-		Levels = 1,
-		PlayTime = 0,
+local TEMPLATE = require(SSS.Modules.Data.PlayerTemplate)
 
-		Class = "Warrior",
-		LastSeenLocation = "InitusVillage",
-	},
-	Quests = {
-		Main = 1,
-		Town = {}
-	}
-}
 local DS1, DS2, DS3 = "CS_DEV1599", "CS_DEV1599_S2", "CS_DEV1599_S3"
 
+local function _oldDataTransfer(data: table)
+	if not data.Stats then return end
+	if data.StatsV2.V1Transfered then return end
+	if data.Stats.PlayTime <= 0 then return end
 
-local function findDataStore(plr: Player, slot: string) : DataStore?
-	local ds
-	if slot == "Slot2" then
-		ds = SuphiDataStore.find(DS2, plr.UserId)
-	elseif slot == "Slot3" then
-		ds = SuphiDataStore.find(DS3, plr.UserId)
-	else
-		ds = SuphiDataStore.find(DS1, plr.UserId)
+	local oldData, newData = data.Stats, data.StatsV2
+
+	--// Stats
+	newData.Levels = oldData.Levels
+	newData.EXP = oldData.EXP
+	newData.Gold = oldData.Gold
+	newData.RP = oldData.RP
+	newData.PlayTime = oldData.PlayTime
+	newData.Class = oldData.Class
+	newData.LvPoints = (oldData.Levels - 1) * 2
+
+	--// Inventory
+	local inventoryV2 = {}
+	for item, amount in data.Inventory do
+		if amount <= 0 then continue end
+
+		local info = {
+			Amount = amount,
+			Equipped = false,
+			Pinned = false,
+			Slot = "None"
+		}
+		inventoryV2[item] = info
 	end
+	data.InventoryV2 = inventoryV2
 
-	return ds
+	--// Done
+	newData.V1Transfered = true
 end
-
 local function setup(plr: Player)
 	local ds, ds2, ds3 =
 		SuphiDataStore.new(DS1, plr.UserId),
 		SuphiDataStore.new(DS2, plr.UserId),
 		SuphiDataStore.new(DS3, plr.UserId)
 
-	local function _stateChanged(state: boolean, datastore: any)
+	local function _stateChanged(_: boolean, datastore: any)
 		while datastore.State == false do
-			if datastore:Open(TEMPLATE) ~= "Success" then wait(6) end
+			if datastore:Open(TEMPLATE) ~= "Success" then wait(1) end
 		end
 	end
 	ds.StateChanged:Connect(_stateChanged)
@@ -59,27 +69,27 @@ local function setup(plr: Player)
 	_stateChanged(ds3.State, ds3)
 
 	if ds and ds2 and ds3 then
-		local data1, data2, data3 = ds.Value :: table, ds2.Value :: table, ds3.Value :: table
+		local datas = { ds.Value, ds2.Value, ds3.Value }
 
-		for i = 1,3 do
-			local folder = SS.PlayerData:Clone()
-			folder.Name = "PlayerData"..i
-			folder.Parent = plr
-		end
-		for i, v in TEMPLATE.Stats do
-			plr.PlayerData1[i].Value = data1.Stats[i]
-			plr.PlayerData2[i].Value = data2.Stats[i]
-			plr.PlayerData3[i].Value = data3.Stats[i]
-		end
+		_oldDataTransfer(datas[1])
+		_oldDataTransfer(datas[2])
+		_oldDataTransfer(datas[3])
 
-		plr.PlayerData1.StoryId.Value = data1.Quests.Main
-		plr.PlayerData2.StoryId.Value = data2.Quests.Main
-		plr.PlayerData3.StoryId.Value = data3.Quests.Main
+		for index: number, data: table in datas do
+			for attr: string, val: any in data.StatsV2 do
+				if attr == "LastLeave" then continue end
+
+				plr:SetAttribute("DATA"..index..""..attr, val)
+			end
+
+			plr:SetAttribute("DATA"..index.."StoryId", data.QuestsV2.Main)
+
+			--// Done
+			plr:SetAttribute("PlayerDataLoaded"..index, true)
+		end
 	else
 		plr:Kick("Rblx datastore may be down rn, try to rejoin later!")
 	end
-
-	plr:SetAttribute("PlayerDataLoaded", true)
 end
 
 local function clear(plr: Player)
@@ -94,30 +104,28 @@ local function clear(plr: Player)
 end
 
 ---// Setups
-for _, plr in Players:GetPlayers() do
-	Spawn(setup, plr)
-end
+for _, plr: Player in Players:GetPlayers() do Spawn(setup, plr) end
 
 --// Connections
-local function _playerAdded(plr: Player)
-	if plr:IsDescendantOf(Players) then --- in case player joins and left very quickly
-		setup(plr)
-	else
-		warn(plr.Name.." joined the left instantly.")
-	end
-end
-local function _playerLeft(plr: Player)
-	clear(plr)
-end
-Players.PlayerAdded:Connect(_playerAdded)
-Players.PlayerRemoving:Connect(_playerLeft)
+Players.PlayerAdded:Connect(setup)
+Players.PlayerRemoving:Connect(clear)
+
 
 local function wipeData(plr: Player, slot: string)
-	local ds = findDataStore(plr, slot)
+	local ds
+	if slot == "Slot2" then
+		ds = SuphiDataStore.find(DS2, plr.UserId)
+	elseif slot == "Slot3" then
+		ds = SuphiDataStore.find(DS3, plr.UserId)
+	else
+		ds = SuphiDataStore.find(DS1, plr.UserId)
+	end
+	if not ds then
+		Events.CreateHint:Fire(plr, "Error occurred when attempting to wipe data...")
+		return
+	end
 
-	if not ds then return end
-
-	ds.Value = {}
+	ds.Value = nil
 
 	plr:Kick("You must rejoin after erasing data!")
 end

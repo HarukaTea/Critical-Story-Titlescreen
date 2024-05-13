@@ -1,4 +1,6 @@
 --!nocheck
+--!optimize 2
+--!native
 
 local Proxy = require(script.Parent.Proxy)
 
