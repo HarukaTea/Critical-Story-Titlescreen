@@ -12,7 +12,7 @@ local Fusion = require(RepS.Modules.Packages.Fusion)
 local Spawn = require(RepS.Modules.Packages.Spawn)
 local Signals = require(RepS.Modules.Data.Signals)
 
-local Children, New = Fusion.Children, Fusion.New
+local Children, New, Computed = Fusion.Children, Fusion.New, Fusion.Computed
 
 local v2New = Vector2.new
 local fromScale = UDim2.fromScale
@@ -40,10 +40,10 @@ local function SaveSlot(index: number, self: table) : Frame
         Size = fromScale(0.214, 7),
         BackgroundTransparency = 0,
 
-        Position = Fusion.Tween(scope, Fusion.Computed(scope, function(use)
+        Position = Fusion.Tween(scope, Computed(scope, function(use)
             return use(self.saveSlotPos[index])
         end), AssetBook.TweenInfos.twiceHalfOne),
-        Visible = Fusion.Computed(scope, function(use)
+        Visible = Computed(scope, function(use)
             return use(self.saveSlotVisible[index])
         end),
 
@@ -80,7 +80,9 @@ local function SaveSlot(index: number, self: table) : Frame
                 BackgroundColor3 = fromRGB(216, 72, 108),
                 ZIndex = 5,
 
-                Visible = if plr:GetAttribute("DATA"..index.."PlayTime") > 0 then true else false,
+                Visible = Computed(scope, function(use)
+                    return if plr:GetAttribute("DATA"..index.."PlayTime") <= 0 then false else use(self.saveSlotEraseVisible[index])
+                end),
 
                 [Fusion.OnEvent("MouseButton1Click")] = function()
                     workspace.Sounds.SFXs.Click:Play()
@@ -180,7 +182,9 @@ local function SaveSlot(index: number, self: table) : Frame
                     self.saveSlotPos[index]:set(fromScale(0.1, 0.5))
 
                     for _, element: any in self.saveSlotVisible do element:set(false) end
+                    for _, element: any in self.saveSlotEraseVisible do element:set(false) end
                     self.saveSlotVisible[index]:set(true)
+                    self.saveSlotEraseVisible[index]:set(true)
 
                     self.isChoosingSaveSlot:set(true)
                     self.friendFramePos:set(fromScale(0.65, -0.7))

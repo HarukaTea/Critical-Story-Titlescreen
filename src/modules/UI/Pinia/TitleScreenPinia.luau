@@ -29,13 +29,14 @@ local function TitleScreenPinia(self: table)
     self.saveSlotVisible = { Value(true), Value(true), Value(true) }
     self.isChoosingSaveSlot = Value(false)
     self.slotChosen = "Slot1"
+    self.saveSlotEraseVisible = { Value(false), Value(false), Value(false) }
 
     self.friendListFrame = Value()
     self.friendsRequestCD = false
     self.friendFramePos = Value(fromScale(1.5, -0.7))
     self.friends = Value({})
     self.friendsAbsContentSize, self.friendsAbsSize = Value(0), Value(0)
-    self.privateCode = Value("CODE")
+    self.privateCode = Value("")
 
     self.isTeleporting = Value(false)
 end

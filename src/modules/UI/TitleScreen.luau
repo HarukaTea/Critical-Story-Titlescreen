@@ -148,6 +148,4 @@ return function(plr: Player)
 			clonedChar.Parent = charSelfViewSlot
 		end))
 	end
-
-	return self
 end

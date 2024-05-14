@@ -53,6 +53,8 @@ return function(plr: Player)
 						Spawn(function()
 							wait(2.7)
 							overallTrans:set(1)
+
+							wait(0.2)
 							canClick:set(false)
 						end)
 

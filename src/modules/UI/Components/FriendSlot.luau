@@ -92,6 +92,8 @@ local function FriendSlot(info: table, self: table, scope: table) : Frame
                     self.isTeleporting:set(true)
 
                     Events.TeleportPrompt:Fire("JoinFriend", info.VisitorId, Fusion.peek(self.slotChosen))
+
+                    workspace.Sounds.SFXs.Click:Play()
                 end,
 
                 [Children] = {

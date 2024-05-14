@@ -33,19 +33,21 @@ local function _oldDataTransfer(data: table)
 	newData.LvPoints = (oldData.Levels - 1) * 2
 
 	--// Inventory
-	local inventoryV2 = {}
-	for item, amount in data.Inventory do
-		if amount <= 0 then continue end
+	if data.Inventory then
+		local inventoryV2 = {}
+		for item, amount in data.Inventory do
+			if amount <= 0 then continue end
 
-		local info = {
-			Amount = amount,
-			Equipped = false,
-			Pinned = false,
-			Slot = "None"
-		}
-		inventoryV2[item] = info
+			local info = {
+				Amount = amount,
+				Equipped = false,
+				Pinned = false,
+				Slot = "None"
+			}
+			inventoryV2[item] = info
+		end
+		data.InventoryV2 = inventoryV2
 	end
-	data.InventoryV2 = inventoryV2
 
 	--// Done
 	newData.V1Transfered = true

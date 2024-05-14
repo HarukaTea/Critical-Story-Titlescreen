@@ -137,8 +137,8 @@ local function FriendList(self: table) : Frame
                         Name = "CodeBox",
                         Position = fromScale(0.33, 0.7),
                         Size = fromScale(0.33, 0.7),
-                        TextColor3 = fromRGB(199, 199, 199),
                         BackgroundTransparency = 0,
+                        PlaceholderText = "PRIVATE CODE HERE",
 
                         Text = Computed(scope, function(use)
                             return use(self.privateCode)

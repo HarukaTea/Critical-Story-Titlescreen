@@ -8,9 +8,7 @@ local AssetBook = require(RepS.Modules.Data.AssetBook)
 local Components = require(RepS.Modules.UI.Vanilla)
 local Fusion = require(RepS.Modules.Packages.Fusion)
 
-local Children, Computed, peek = Fusion.Children, Fusion.Computed, Fusion.peek
-
-local FuncButton = require(RepS.Modules.UI.Components.FuncButton)
+local peek = Fusion.peek
 
 local v2New = Vector2.new
 local fromScale = UDim2.fromScale
@@ -22,34 +20,16 @@ local function BtnsFrame(self: table) : Frame
     return Components.Frame(scope, {
         Name = "BtnsFrame",
 
-        [Children] = {
-            Components.Frame(scope, {
-                Name = "SideButtons",
-                AnchorPoint = v2New(),
-                Position = fromScale(0.01, 0),
-                Size = fromScale(0.13, 0.6),
-
-                [Children] = {
-                    Fusion.New(scope, "UIListLayout")({
-                        SortOrder = Enum.SortOrder.LayoutOrder,
-                        Padding = udNew(0.5, 0),
-                        HorizontalAlignment = Enum.HorizontalAlignment.Center,
-                        VerticalAlignment = Enum.VerticalAlignment.Bottom,
-                    }),
-
-                    FuncButton("Credits", self),
-                    FuncButton("Updates", self),
-                }
-            }),
+        [Fusion.Children] = {
             Components.TextButton(scope, {
                 Name = "PlayButton",
                 AnchorPoint = v2New(0.5, 0),
                 Size = fromScale(0.13, 0.6),
 
-                Position = Fusion.Tween(scope, Computed(scope, function(use)
+                Position = Fusion.Tween(scope, Fusion.Computed(scope, function(use)
                     return use(self.playBtnPos)
                 end), AssetBook.TweenInfos.one),
-                Text = Computed(scope, function(use)
+                Text = Fusion.Computed(scope, function(use)
                     return use(self.playBtnText)
                 end),
 
@@ -64,6 +44,7 @@ local function BtnsFrame(self: table) : Frame
 
                     elseif peek(self.playBtnText) == "BACK" and peek(self.isChoosingSaveSlot) then
                         for _, element: any in self.saveSlotVisible do element:set(true) end
+                        for _, element: any in self.saveSlotEraseVisible do element:set(false) end
 
                         self.saveSlotPos[1]:set(fromScale(0.139, 0.5))
                         self.saveSlotPos[2]:set(fromScale(0.393, 0.5))

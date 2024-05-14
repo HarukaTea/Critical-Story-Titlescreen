@@ -16,7 +16,7 @@ local rad = math.rad
 
 local function blurSetup()
     local blur = instanceNew("BlurEffect")
-    blur.Size = 8
+    blur.Size = 10
     blur.Parent = camera
 end
 blurSetup()

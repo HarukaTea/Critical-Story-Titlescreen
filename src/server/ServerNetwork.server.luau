@@ -11,22 +11,37 @@ local TeleS = game:GetService("TeleportService")
 local Events = require(SSS.Modules.Data.ServerEvents)
 local Spawn = require(RepS.Modules.Packages.Spawn)
 
-local CODE = { "MILKSHAKE", "GENSHIN", "FAKECW", "STRIKE", "TACO", "HAII" }
+local CODE = { "MILKSHAKE", "GENSHIN", "FAKECW", "STRIKE", "TACO", "FALLEN" }
 local WORLDS = {
 	MainWorld = 12343565896, TestNormal = 12003361010, FakeCW = 12373196969,
 	CSCA = 1043446942, V1World = 12294239008, TestDeep = 6605778811,
-	TestPastel = 17444533020
+	TestFront = 17444533020
 }
 
 local instanceNew = Instance.new
 local tFind = table.find
 local wait = task.wait
 
+local function _teleportPrivateTests(id: string, rankNeeded: number, plr: Player, tpOptions: TeleportOptions)
+	local groups, rank = GS:GetGroupsAsync(plr.UserId), 0
+
+	for _, group: table in groups do
+		if group.Id == 16912246 then rank = group.Rank end
+	end
+
+	if rank >= rankNeeded then
+		TeleS:TeleportAsync(WORLDS[id], { plr }, tpOptions)
+	else
+		Events.CreateHint:Fire(plr, "You don't have the permission to join test place!", "Error")
+		Events.TeleportFailed:Fire(plr)
+	end
+end
 local function teleportHandler(plr: Player, option: string, privateCode: string, dataChosen: string)
 	local teleportOptions = instanceNew("TeleportOptions")
 	teleportOptions:SetTeleportData({ dataChosen })
 
-	if option == "Solo" then
+	if option == "JoinPublic" then
+		wait(0.5)
 		TeleS:TeleportAsync(WORLDS.MainWorld, { plr }, teleportOptions)
 
 	elseif option == "CreatePrivate" then
@@ -72,18 +87,7 @@ local function teleportHandler(plr: Player, option: string, privateCode: string,
 		MS:PublishAsync("ReturnAllPrivateServers", privateCode)
 
 	elseif option == "JoinPrivate" and privateCode == "MILKSHAKE" then
-		local groups, rank = GS:GetGroupsAsync(plr.UserId), 0
-
-		for _, group: table in groups do
-			if group.Id == 16912246 then rank = group.Rank end
-		end
-
-		if rank >= 2 then
-			TeleS:TeleportAsync(WORLDS.TestNormal, { plr }, teleportOptions)
-		else
-			Events.CreateHint:Fire(plr, "You don't have the permission to join test place!", "Error")
-			Events.TeleportFailed:Fire(plr)
-		end
+		_teleportPrivateTests("TestNormal", 2, plr, teleportOptions)
 
 	elseif option == "JoinPrivate" and privateCode == "GENSHIN" then
 		TeleS:Teleport(WORLDS.V1World, plr)
@@ -95,28 +99,10 @@ local function teleportHandler(plr: Player, option: string, privateCode: string,
 		TeleS:TeleportAsync(WORLDS.CSCA, { plr }, teleportOptions)
 
 	elseif option == "JoinPrivate" and privateCode == "TACO" then
-		local groups, rank = GS:GetGroupsAsync(plr.UserId), 0
+		_teleportPrivateTests("TestDeep", 3, plr, teleportOptions)
 
-		for _, group: table in groups do
-			if group.Id == 16912246 then rank = group.Rank end
-		end
-
-		if rank >= 3 then
-			TeleS:TeleportAsync(WORLDS.TestDeep, { plr }, teleportOptions)
-		else
-			Events.CreateHint:Fire(plr, "You don't have the permission to join test place!", "Error")
-			Events.TeleportFailed:Fire(plr)
-		end
-
-	elseif option == "JoinPrivate" and privateCode == "HAII" then
-		local whiteList = { 875015360, 304008764 }
-
-		if tFind(whiteList, plr.UserId) then
-			TeleS:TeleportAsync(WORLDS.TestPastel, { plr }, teleportOptions)
-		else
-			Events.CreateHint:Fire(plr, "You don't have the permission to join test place!", "Error")
-			Events.TeleportFailed:Fire(plr)
-		end
+	elseif option == "JoinPrivate" and privateCode == "FALLEN" then
+		_teleportPrivateTests("TestFront", 2, plr, teleportOptions)
 
 	elseif option == "JoinFriend" then
 		local success, errorMsg = pcall(function()
