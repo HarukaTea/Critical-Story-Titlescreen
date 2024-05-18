@@ -47,11 +47,9 @@ local function _oldDataTransfer(data: table)
 		end
 		data.InventoryV2 = inventoryV2
 	end
-	print("6")
 
 	--// Done
 	data.StatsV2.V2Transfered = true
-	print("7")
 end
 local function setup(plr: Player)
 	local ds, ds2, ds3 =

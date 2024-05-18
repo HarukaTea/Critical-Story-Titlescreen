@@ -107,16 +107,14 @@ local function teleportHandler(plr: Player, option: string, privateCode: string,
 	elseif option == "JoinFriend" then
 		local success, errorMsg = pcall(function()
 			local visitorId = privateCode
-			local result = TeleS:GetPlayerPlaceInstanceAsync(visitorId)
+			local check, placeId, jobId = TeleS:GetPlayerPlaceInstanceAsync(visitorId)
 
-			if not result[1] then
+			if not check then
 				Events.CreateHint:Fire(plr, "Can't join your friend right now!")
 				Events.CreateHint:Fire(plr, "Try again later!")
 
 				Events.TeleportFailed:Fire(plr)
 			end
-
-			local placeId, jobId = result[3], result[4]
 			teleportOptions.ServerInstanceId = jobId
 
 			TeleS:TeleportAsync(placeId, { plr }, teleportOptions)
