@@ -16,6 +16,7 @@ local rad = math.rad
 
 local function blurSetup()
     local blur = instanceNew("BlurEffect")
+    blur.Name = "UIBlur"
     blur.Size = 10
     blur.Parent = camera
 end

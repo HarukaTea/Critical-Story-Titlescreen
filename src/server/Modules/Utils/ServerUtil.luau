@@ -9,9 +9,6 @@ local sFind = string.find
 
 local ServerUtil = {}
 
---[[
-	SuperWeld actually, a simple function to create weld between two parts
-]]
 function ServerUtil:WeldPart(part: Part, welded: Model)
 	local C = welded:GetChildren()
 	for i = 1, #C do
@@ -37,9 +34,6 @@ function ServerUtil:WeldPart(part: Part, welded: Model)
 	end
 end
 
---[[
-	Equip player's weapon, you can only pass an class string to force equip
-]]
 function ServerUtil:EquipWeapon(char: Model, class: string)
 	local styleFolder = RepS.Package.StyleWeapons[class] :: Folder
 
@@ -47,7 +41,8 @@ function ServerUtil:EquipWeapon(char: Model, class: string)
 		if sFind(child.Name, "Weapon") then child:Destroy() end
 	end
 
-	local function _equipWeapon(weapon: Model)
+	local function _equipWeapon()
+		local weapon = styleFolder.WeaponEquipped:Clone() :: Model
 		local weldPos = if weapon:GetAttribute("Position") then weapon:GetAttribute("Position") else "Right Arm"
 
 		ServerUtil:WeldPart(char[weldPos], weapon)
@@ -55,18 +50,23 @@ function ServerUtil:EquipWeapon(char: Model, class: string)
 		weapon.Parent = char
 	end
 
-	_equipWeapon(styleFolder.WeaponEquipped:Clone())
-	if styleFolder:FindFirstChild("WeaponEquipped2") then _equipWeapon(styleFolder.WeaponEquipped2:Clone()) end
+	_equipWeapon()
+	if styleFolder:FindFirstChild("WeaponEquipped2") then _equipWeapon() end
 end
 
---[[
-	A simple function to set a part's collision group
-]]
 function ServerUtil:SetCollisionGroup(object: Instance, group: string)
 	if object:IsA("BasePart") or object:IsA("UnionOperation") or object:IsA("CornerWedgePart") then object.CollisionGroup = group end
 
-	for _, child: Instance in object:GetChildren() do
-		ServerUtil:SetCollisionGroup(child, group)
+	for _, child: Instance in object:GetChildren() do ServerUtil:SetCollisionGroup(child, group) end
+end
+
+function ServerUtil:CancelRaycast(obj: Instance)
+	for _, child: Instance in obj:GetDescendants() do
+		if child:IsA("UnionOperation") or child:IsA("BasePart") or child:IsA("CornerWedgePart") then
+			child.CanCollide = false
+			child.CanTouch = false
+			child.CanQuery = false
+		end
 	end
 end
 

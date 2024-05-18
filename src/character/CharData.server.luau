@@ -19,7 +19,9 @@ local function setup()
     repeat wait() until plr:GetAttribute("PlayerDataLoaded3")
 
     char.Archivable = true
+
     ServerUtil:SetCollisionGroup(char, "Player")
+    ServerUtil:CancelRaycast(char)
 
     local container = instanceNew("Folder")
     container.Name = plr.Name
@@ -35,7 +37,9 @@ local function setup()
         clonedChar:PivotTo(workspace.MapComponents.SaveSlotLocators["Locator"..i].CFrame)
         clonedChar.Name = "Slot"..i
 
+        ServerUtil:SetCollisionGroup(clonedChar, "ClonedCharacter")
         ServerUtil:EquipWeapon(clonedChar, plr:GetAttribute("DATA"..i.."Class"))
+        ServerUtil:CancelRaycast(clonedChar)
 
         clonedChar.Parent = container
 

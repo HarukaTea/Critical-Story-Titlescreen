@@ -49,6 +49,11 @@ AssetBook.friendsStatusColors = {
 }
 
 AssetBook.LocationInfo = {
+    MonolithVillage = "Monolith Village",
+    MonolithGrove = "Monolith Grove",
+    MisniPort = "Misni Port",
+    Highland = "Highland",
+
     InitusBay = "Initus Bay",
     PrimisField = "Primis Field",
     ThyrsusForest = "Thyrsus Woods",
@@ -68,12 +73,7 @@ AssetBook.LocationInfo = {
     AuraIsland = "Aura Islands",
     FirestoneIsland = "Firestone Islands",
 
-    --// Abandoned places in 0.8
-    InitusVillage = "Initus Village",
-    MonolithGrove = "Monolith Grove",
-    MisniPort = "Misni Port",
-    Highland = "Highland",
-    Tundra = "Tundra"
+    Tundra = "Tundra",
 }
 
 AssetBook.StorySeries = {

@@ -17,7 +17,7 @@ local v2New = Vector2.new
 local fromScale, fromOffset = UDim2.fromScale, UDim2.fromOffset
 local udNew = UDim.new
 local fromRGB = Color3.fromRGB
-local sFind = string.find
+local sFind, upper = string.find, string.upper
 
 local function FriendList(self: table) : Frame
     local scope = self.scope :: table
@@ -141,7 +141,7 @@ local function FriendList(self: table) : Frame
                         PlaceholderText = "PRIVATE CODE HERE",
 
                         Text = Computed(scope, function(use)
-                            return use(self.privateCode)
+                            return upper(tostring(use(self.privateCode)))
                         end),
 
                         [Fusion.Out("Text")] = self.privateCode,

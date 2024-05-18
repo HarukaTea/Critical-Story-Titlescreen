@@ -11,8 +11,8 @@ return {
 		PlayTime = 0,
 
 		Class = "Warrior",
-		LastSeenLocation = "InitusBay",
-		LastLeave = { "Vector3", 0, 0, 0 },
+		LastSeenLocation = "MonolithVillage",
+		RespawnLocation = { "Vector3", 0, 0, 0 },
 
 		LvPoints = 0,
 		DMGPoints = 0,
@@ -21,7 +21,14 @@ return {
 		ShieldPoints = 0,
 		HealthPoints = 0,
 
-		V1Transfered = false
+		V2Transfered = false
+	},
+
+	BanStats = {
+		IsBanned = false,
+		Duration = 0,
+		BannedTime = 0,
+		Reason = ""
 	},
 
 	InventoryV2 = {},

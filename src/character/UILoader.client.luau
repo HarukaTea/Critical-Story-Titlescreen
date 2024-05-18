@@ -7,14 +7,17 @@ local RepS = game:GetService("ReplicatedStorage")
 
 local Spawn = require(RepS.Modules.Packages.Spawn)
 
+local plr = Players.LocalPlayer
+
 local UIModules = RepS.Modules.UI
 local requireList = {
-    UIModules.PostStroke,
     UIModules.Hints,
 	UIModules.TitleScreen
 }
-for _, module in requireList do
-	Spawn(function()
-		require(module)(Players.LocalPlayer)
-	end)
+
+local function setup()
+	for _, module: ModuleScript in requireList do
+		Spawn(function() require(module)(plr) end)
+	end
 end
+setup()
