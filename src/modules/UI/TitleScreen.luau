@@ -136,7 +136,7 @@ return function(plr: Player)
 		local charSelfViewSlot = Fusion.peek(self.charSelfViews[i]) :: ViewportFrame
 		charSelfViewSlot.CurrentCamera = charSelfViewSlot:FindFirstChildOfClass("Camera")
 
-		workspace.MapComponents.PlayerChars:WaitForChild(self.plr.Name):WaitForChild("Slot"..i, 999)
+		workspace.MapComponents.PlayerChars:WaitForChild(self.plr.Name, 999):WaitForChild("Slot"..i, 999)
 
 		self.Add(RS.Heartbeat:Connect(function()
 			if charSelfViewSlot:FindFirstChildOfClass("Model") then charSelfViewSlot:FindFirstChildOfClass("Model"):Destroy() end

@@ -2,6 +2,7 @@
 --!optimize 2
 --!native
 
+local DSS = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local RepS = game:GetService("ReplicatedStorage")
 local SSS = game:GetService("ServerScriptService")
@@ -9,14 +10,38 @@ local SSS = game:GetService("ServerScriptService")
 local Events = require(SSS.Modules.Data.ServerEvents)
 local HarukaLib = require(RepS.Modules.Packages.HarukaLib)
 local Spawn = require(RepS.Modules.Packages.Spawn)
-local SuphiDataStore = require(RepS.Modules.Packages.SuphiDataStore)
+local Promise = require(RepS.Modules.Packages.Promise)
 
-local wait = task.wait
-local format = string.format
+local playerDatas = {}
+
+local format, match = string.format, string.match
+local tFind = table.find
 
 local DATASTORES = require(SSS.Modules.Data.DataStoreTemplate)
 local TEMPLATE = require(SSS.Modules.Data.PlayerTemplate)
 
+
+local function _deepCopyTable(t: table) : table
+	local copy = {}
+
+	for k, v in pairs(t) do
+		if type(v) == "table" then copy[k] = _deepCopyTable(v) else copy[k] = v end
+	end
+
+	return copy
+end
+local function _reconcile(data: table, template: table)
+	for k, v in pairs(template) do
+		if type(k) == "string" then --- only string keys will be reconciled
+			if data[k] == nil then
+				if type(v) == "table" then data[k] = _deepCopyTable(v) else data[k] = v end
+
+			elseif type(data[k]) == "table" and type(v) == "table" then
+				_reconcile(data[k], v)
+			end
+		end
+	end
+end
 local function _oldDataTransfer(data: table)
 	if not data.Stats then return end
 	if data.StatsV2.V2Transfered then return end
@@ -51,34 +76,39 @@ local function _oldDataTransfer(data: table)
 	--// Done
 	data.StatsV2.V2Transfered = true
 end
+
+
 local function setup(plr: Player)
-	local ds, ds2, ds3 =
-		SuphiDataStore.new(DATASTORES[1], plr.UserId),
-		SuphiDataStore.new(DATASTORES[2], plr.UserId),
-		SuphiDataStore.new(DATASTORES[3], plr.UserId)
+	Promise.new(function(resolve)
+		local ds, ds2, ds3 =
+			DSS:GetDataStore(DATASTORES[1]),
+			DSS:GetDataStore(DATASTORES[2]),
+			DSS:GetDataStore(DATASTORES[3])
 
-	local function _stateChanged(_: boolean, datastore: any)
-		while datastore.State == false do
-			if datastore:Open(TEMPLATE) ~= "Success" then wait(1) end
-		end
-	end
-	ds.StateChanged:Connect(_stateChanged)
-	ds2.StateChanged:Connect(_stateChanged)
-	ds3.StateChanged:Connect(_stateChanged)
-	_stateChanged(ds.State, ds)
-	_stateChanged(ds2.State, ds2)
-	_stateChanged(ds3.State, ds3)
+		local data1, data2, data3 =
+			ds:GetAsync(plr.UserId),
+			ds2:GetAsync(plr.UserId),
+			ds3:GetAsync(plr.UserId)
 
-	if ds and ds2 and ds3 then
-		local datas = { ds.Value, ds2.Value, ds3.Value }
+		resolve(data1, data2, data3)
+
+	end):andThen(function(data1: table, data2: table, data3: table)
+		local datas = { data1 or TEMPLATE, data2 or TEMPLATE, data3 or TEMPLATE }
+
+		_reconcile(datas[1], TEMPLATE)
+		_reconcile(datas[2], TEMPLATE)
+		_reconcile(datas[3], TEMPLATE)
 
 		_oldDataTransfer(datas[1])
 		_oldDataTransfer(datas[2])
 		_oldDataTransfer(datas[3])
 
+		playerDatas[plr.Name] = datas
+
+		local blacklist = { "LastLeave", "V1Transfered",  }
 		for index: number, data: table in datas do
 			for attr: string, val: any in data.StatsV2 do
-				if attr == "LastLeave" then continue end
+				if tFind(blacklist, attr) then continue end
 
 				plr:SetAttribute("DATA"..index..""..attr, HarukaLib:Deserialize(val))
 			end
@@ -91,6 +121,8 @@ local function setup(plr: Player)
 
 		--// Check if banned
 		for i = 1, 3 do
+			if not datas[i] then return end
+
 			local banInfo = datas[i].BanStats :: table
 			if banInfo.IsBanned then
 				local timeGap = (time() - banInfo.BannedTime) / 60 / 60
@@ -105,20 +137,22 @@ local function setup(plr: Player)
 				end
 			end
 		end
-	else
-		plr:Kick("Rblx datastore may be down rn, try to rejoin later!")
-	end
+	end)
 end
-
 local function clear(plr: Player)
-	local ds, ds2, ds3 =
-		SuphiDataStore.find(DATASTORES[1], plr.UserId),
-		SuphiDataStore.find(DATASTORES[2], plr.UserId),
-		SuphiDataStore.find(DATASTORES[3], plr.UserId)
+	local datas = playerDatas[plr.Name] :: table
 
-    if ds then ds:Destroy() end
-	if ds2 then ds2:Destroy() end
-	if ds3 then ds3:Destroy() end
+	pcall(function()
+		DSS:GetDataStore(DATASTORES[1]):SetAsync(plr.UserId, datas[1])
+	end)
+	pcall(function()
+		DSS:GetDataStore(DATASTORES[2]):SetAsync(plr.UserId, datas[2])
+	end)
+	pcall(function()
+		DSS:GetDataStore(DATASTORES[3]):SetAsync(plr.UserId, datas[3])
+	end)
+
+	playerDatas[plr.Name] = nil
 end
 
 ---// Setups
@@ -130,20 +164,14 @@ Players.PlayerRemoving:Connect(clear)
 
 
 local function wipeData(plr: Player, slot: string)
-	local ds
-	if slot == "Slot2" then
-		ds = SuphiDataStore.find(DATASTORES[2], plr.UserId)
-	elseif slot == "Slot3" then
-		ds = SuphiDataStore.find(DATASTORES[3], plr.UserId)
-	else
-		ds = SuphiDataStore.find(DATASTORES[1], plr.UserId)
-	end
-	if not ds then
-		Events.CreateHint:Fire(plr, "Error occurred when attempting to wipe data...")
+	local realSlot = tonumber(match(slot, "%d"))
+
+	if not realSlot then
+		Events.CreateHint:Fire(plr, "Error occured when wiping data!")
 		return
 	end
 
-	ds.Value = nil
+	playerDatas[plr.Name][realSlot] = TEMPLATE
 
 	plr:Kick("You must rejoin after erasing data!")
 end

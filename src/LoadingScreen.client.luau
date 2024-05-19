@@ -2,9 +2,7 @@
 --!optimize 2
 --!native
 
-local CAS = game:GetService("ContextActionService")
 local Players = game:GetService("Players")
-local RepS = game:GetService("ReplicatedStorage")
 local RS = game:GetService("RunService")
 local RF = game:GetService("ReplicatedFirst")
 local SG = game:GetService("StarterGui")
@@ -21,16 +19,16 @@ local v2New = Vector2.new
 local cfNew = CFrame.new
 local fontFromName = Font.fromName
 
+local halfTween, sixTween = newTweenInfo(0.5), newTweenInfo(6)
+
 local loadFinished = false
 
-spawn(function()
-    RF:RemoveDefaultLoadingScreen()
-    SG:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
+RF:RemoveDefaultLoadingScreen()
+SG:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
 
+--// Disable reset button
+spawn(function()
     UIS.ModalEnabled = true
-    CAS:BindActionAtPriority("FreezeControl", function()
-        return Enum.ContextActionResult.Sink
-    end, false, Enum.ContextActionPriority.High.Value, unpack(Enum.PlayerActions:GetEnumItems()))
 
     local coreCall do
         local MAX_RETRIES = 99999
@@ -48,7 +46,7 @@ spawn(function()
     coreCall("SetCore", "ResetButtonCallback", false)
 end)
 
---- create a default blackscreen before fusion loads
+---// create a default blackscreen before fusion loads
 local ui = newInstance("ScreenGui")
 ui.Name = "Loading"
 ui.ScreenInsets = Enum.ScreenInsets.None
@@ -144,17 +142,13 @@ delay(9, function()
 
     textLabel.Text = "Adventure is taking longer than expected..."
 end)
-delay(30, function()
+delay(20, function()
     if loadFinished then return end
 
-    textLabel.Text = "Adventure load failed...Datastore may be having issues right now..."
-
-    wait(1)
-    require(RepS.Modules.Data.Events).ErrorDataStore:Fire()
+    textLabel.Text = "Adventure is loading so hard with a high ping..."
 end)
 
 --- wait until data loads
-local halfTween, sixTween = newTweenInfo(0.5), newTweenInfo(6)
 TS:Create(bar, sixTween, { Size = fromScale(0.6, 0.1) }):Play()
 
 repeat wait() until plr:GetAttribute("PlayerDataLoaded1")
