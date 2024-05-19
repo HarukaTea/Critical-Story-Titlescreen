@@ -3,6 +3,7 @@
 --!native
 
 local Players = game:GetService("Players")
+local RepS = game:GetService("ReplicatedStorage")
 local SSS = game:GetService("ServerScriptService")
 
 local ServerUtil = require(SSS.Modules.Utils.ServerUtil)
@@ -21,16 +22,12 @@ local function setup()
     char.Archivable = true
 
     ServerUtil:SetCollisionGroup(char, "Player")
-    ServerUtil:CancelRaycast(char)
 
     local container = instanceNew("Folder")
     container.Name = plr.Name
     container.Parent = workspace.MapComponents.PlayerChars
 
     local charHumanoidDesc = Players:GetHumanoidDescriptionFromUserId(plr.UserId)
-    local anim = instanceNew("Animation")
-    anim.AnimationId = "rbxassetid://17431076015"
-
     for i = 1, 3 do
         local clonedChar = Players:CreateHumanoidModelFromDescription(charHumanoidDesc, Enum.HumanoidRigType.R6)
 
@@ -39,12 +36,11 @@ local function setup()
 
         ServerUtil:SetCollisionGroup(clonedChar, "ClonedCharacter")
         ServerUtil:EquipWeapon(clonedChar, plr:GetAttribute("DATA"..i.."Class"))
-        ServerUtil:CancelRaycast(clonedChar)
 
         clonedChar.Parent = container
 
         clonedChar.Animate:Destroy()
-        clonedChar:WaitForChild("Humanoid").Animator:LoadAnimation(anim):Play()
+        clonedChar:WaitForChild("Humanoid"):LoadAnimation(RepS.Package.Idle):Play()
     end
 end
 setup()

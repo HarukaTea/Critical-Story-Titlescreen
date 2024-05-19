@@ -23,7 +23,7 @@ end
 blurSetup()
 
 local function skyballSetup()
-    local skyball = workspace:WaitForChild("Maps").TimeDomain.Models.Skyball :: Model
+    local skyball = workspace:WaitForChild("Maps", 999).TimeDomain.Models.Skyball :: Model
 
     HarukaLib.Clock(0.01, function()
         skyball:PivotTo(skyball.PrimaryPart.CFrame * cfAngles(0, rad(0.1), 0))

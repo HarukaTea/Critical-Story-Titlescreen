@@ -23,7 +23,9 @@ local tFind = table.find
 local wait = task.wait
 
 local function _teleportPrivateTests(id: string, rankNeeded: number, plr: Player, tpOptions: TeleportOptions)
-	local groups, rank = GS:GetGroupsAsync(plr.UserId), 0
+	local _, _, groups, rank = pcall(function()
+		return GS:GetGroupsAsync(plr.UserId), 0
+	end)
 
 	for _, group: table in groups do
 		if group.Id == 16912246 then rank = group.Rank end
@@ -107,9 +109,11 @@ local function teleportHandler(plr: Player, option: string, privateCode: string,
 	elseif option == "JoinFriend" then
 		local success, errorMsg = pcall(function()
 			local visitorId = privateCode
-			local check, placeId, jobId = TeleS:GetPlayerPlaceInstanceAsync(visitorId)
+			local ok, _, errorText, placeId, jobId = pcall(function()
+				return TeleS:GetPlayerPlaceInstanceAsync(visitorId)
+			end)
 
-			if not check then
+			if not ok then
 				Events.CreateHint:Fire(plr, "Can't join your friend right now!")
 				Events.CreateHint:Fire(plr, "Try again later!")
 

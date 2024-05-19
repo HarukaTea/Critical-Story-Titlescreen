@@ -60,14 +60,4 @@ function ServerUtil:SetCollisionGroup(object: Instance, group: string)
 	for _, child: Instance in object:GetChildren() do ServerUtil:SetCollisionGroup(child, group) end
 end
 
-function ServerUtil:CancelRaycast(obj: Instance)
-	for _, child: Instance in obj:GetDescendants() do
-		if child:IsA("UnionOperation") or child:IsA("BasePart") or child:IsA("CornerWedgePart") then
-			child.CanCollide = false
-			child.CanTouch = false
-			child.CanQuery = false
-		end
-	end
-end
-
 return ServerUtil

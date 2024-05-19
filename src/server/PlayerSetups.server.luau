@@ -10,12 +10,12 @@ local SSS = game:GetService("ServerScriptService")
 local Events = require(SSS.Modules.Data.ServerEvents)
 local HarukaLib = require(RepS.Modules.Packages.HarukaLib)
 local Spawn = require(RepS.Modules.Packages.Spawn)
-local Promise = require(RepS.Modules.Packages.Promise)
 
 local playerDatas = {}
 
 local format, match = string.format, string.match
 local tFind = table.find
+local time = os.time
 
 local DATASTORES = require(SSS.Modules.Data.DataStoreTemplate)
 local TEMPLATE = require(SSS.Modules.Data.PlayerTemplate)
@@ -42,104 +42,62 @@ local function _reconcile(data: table, template: table)
 		end
 	end
 end
-local function _oldDataTransfer(data: table)
-	if not data.Stats then return end
-	if data.StatsV2.V2Transfered then return end
-	if data.Stats.PlayTime <= 0 then return end
-
-	--// Stats
-	data.StatsV2.Levels = data.Stats.Levels
-	data.StatsV2.EXP = data.Stats.EXP
-	data.StatsV2.Gold = data.Stats.Gold
-	data.StatsV2.RP = data.Stats.RP
-	data.StatsV2.PlayTime = data.Stats.PlayTime
-	data.StatsV2.Class = data.Stats.Class
-	data.StatsV2.LvPoints = (data.Stats.Levels - 1) * 2
-
-	--// Inventory
-	if data.Inventory then
-		local inventoryV2 = {}
-		for item, amount in data.Inventory do
-			if amount <= 0 then continue end
-
-			local info = {
-				Amount = amount,
-				Equipped = false,
-				Pinned = false,
-				Slot = "None"
-			}
-			inventoryV2[item] = info
-		end
-		data.InventoryV2 = inventoryV2
-	end
-
-	--// Done
-	data.StatsV2.V2Transfered = true
-end
-
 
 local function setup(plr: Player)
-	Promise.new(function(resolve)
-		local ds, ds2, ds3 =
-			DSS:GetDataStore(DATASTORES[1]),
-			DSS:GetDataStore(DATASTORES[2]),
-			DSS:GetDataStore(DATASTORES[3])
+	local ds, ds2, ds3 =
+		DSS:GetDataStore(DATASTORES[1]),
+		DSS:GetDataStore(DATASTORES[2]),
+		DSS:GetDataStore(DATASTORES[3])
 
-		local data1, data2, data3 =
-			ds:GetAsync(plr.UserId),
-			ds2:GetAsync(plr.UserId),
-			ds3:GetAsync(plr.UserId)
+	local data1, data2, data3 =
+		ds:GetAsync(plr.UserId),
+		ds2:GetAsync(plr.UserId),
+		ds3:GetAsync(plr.UserId)
 
-		resolve(data1, data2, data3)
+	local datas = { data1 or TEMPLATE, data2 or TEMPLATE, data3 or TEMPLATE }
 
-	end):andThen(function(data1: table, data2: table, data3: table)
-		local datas = { data1 or TEMPLATE, data2 or TEMPLATE, data3 or TEMPLATE }
+	_reconcile(datas[1], TEMPLATE)
+	_reconcile(datas[2], TEMPLATE)
+	_reconcile(datas[3], TEMPLATE)
 
-		_reconcile(datas[1], TEMPLATE)
-		_reconcile(datas[2], TEMPLATE)
-		_reconcile(datas[3], TEMPLATE)
+	playerDatas[plr.Name] = datas
 
-		_oldDataTransfer(datas[1])
-		_oldDataTransfer(datas[2])
-		_oldDataTransfer(datas[3])
+	local blacklist = { "LastLeave", "V1Transfered", "V2Transfered" }
+	for index: number, data: table in datas do
+		for attr: string, val: any in data.Stats do
+			if tFind(blacklist, attr) then continue end
 
-		playerDatas[plr.Name] = datas
-
-		local blacklist = { "LastLeave", "V1Transfered",  }
-		for index: number, data: table in datas do
-			for attr: string, val: any in data.StatsV2 do
-				if tFind(blacklist, attr) then continue end
-
-				plr:SetAttribute("DATA"..index..""..attr, HarukaLib:Deserialize(val))
-			end
-
-			plr:SetAttribute("DATA"..index.."StoryId", data.QuestsV2.Main)
-
-			--// Done
-			plr:SetAttribute("PlayerDataLoaded"..index, true)
+			plr:SetAttribute("DATA"..index..""..attr, HarukaLib:Deserialize(val))
 		end
 
-		--// Check if banned
-		for i = 1, 3 do
-			if not datas[i] then return end
+		plr:SetAttribute("DATA"..index.."StoryId", data.QuestsV2.Main)
 
-			local banInfo = datas[i].BanStats :: table
-			if banInfo.IsBanned then
-				local timeGap = (time() - banInfo.BannedTime) / 60 / 60
+		--// Done
+		plr:SetAttribute("PlayerDataLoaded"..index, true)
+	end
 
-				if timeGap < banInfo.Duration then
-					local durationLeft = format("%.1f", tostring(banInfo.Duration - timeGap))
+	--// Check if banned
+	for i = 1, 3 do
+		if not datas[i] then return end
 
-					plr:Kick("You got banned! Reason: "..banInfo.Reason..", unban in "..durationLeft.." hours!")
-				else
-					--// unban
-					datas[i].BanStats = TEMPLATE.BanStats
-				end
+		local banInfo = datas[i].BanStats :: table
+		if banInfo.IsBanned then
+			local timeGap = (time() - banInfo.BannedTime) / 60 / 60
+
+			if timeGap < banInfo.Duration then
+				local durationLeft = format("%.1f", tostring(banInfo.Duration - timeGap))
+
+				plr:Kick("You got banned! Reason: "..banInfo.Reason..", unban in "..durationLeft.." hours!")
+			else
+				--// unban
+				datas[i].BanStats = TEMPLATE.BanStats
 			end
 		end
-	end)
+	end
 end
 local function clear(plr: Player)
+	if not playerDatas[plr.Name] then return end
+
 	local datas = playerDatas[plr.Name] :: table
 
 	pcall(function()
@@ -173,6 +131,6 @@ local function wipeData(plr: Player, slot: string)
 
 	playerDatas[plr.Name][realSlot] = TEMPLATE
 
-	plr:Kick("You must rejoin after erasing data!")
+	plr:Kick("Data has wiped, rejoin to continue!")
 end
 Events.DataWipe:Connect(wipeData)

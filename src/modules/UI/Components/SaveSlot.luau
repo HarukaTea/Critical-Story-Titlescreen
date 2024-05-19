@@ -32,7 +32,7 @@ local function SaveSlot(index: number, self: table) : Frame
     local scope = self.scope :: table
     local plr = self.plr :: Player
 
-    local eraseConfirmed = 20
+    local eraseConfirmed = 10
 
     return Components.Frame(scope, {
         Name = "SaveSlot"..index,
@@ -192,7 +192,10 @@ local function SaveSlot(index: number, self: table) : Frame
 
                     if not self.friendsRequestCD then
                         self.friendsRequestCD = true
-                        self.friends:set(self.plr:GetFriendsOnline())
+
+                        pcall(function()
+                            self.friends:set(self.plr:GetFriendsOnline())
+                        end)
 
                         Spawn(function()
                             for _, element: Frame in Fusion.peek(self.friendListFrame):GetChildren() do
