@@ -13,9 +13,7 @@ local Spawn = require(RepS.Modules.Packages.Spawn)
 
 local CODE = { "MILKSHAKE", "GENSHIN", "FAKECW", "STRIKE", "TACO", "FALLEN" }
 local WORLDS = {
-	MainWorld = 12343565896, TestNormal = 12003361010, FakeCW = 12373196969,
-	CSCA = 1043446942, V1World = 12294239008, TestDeep = 6605778811,
-	TestFront = 17444533020
+	MainWorld = 17553948946, TestNormal = 17553875545
 }
 
 local instanceNew = Instance.new
@@ -91,25 +89,10 @@ local function teleportHandler(plr: Player, option: string, privateCode: string,
 	elseif option == "JoinPrivate" and privateCode == "MILKSHAKE" then
 		_teleportPrivateTests("TestNormal", 2, plr, teleportOptions)
 
-	elseif option == "JoinPrivate" and privateCode == "GENSHIN" then
-		TeleS:Teleport(WORLDS.V1World, plr)
-
-	elseif option == "JoinPrivate" and privateCode == "FAKECW" then
-		TeleS:TeleportAsync(WORLDS.FakeCW, { plr }, teleportOptions)
-
-	elseif option == "JoinPrivate" and privateCode == "STRIKE" then
-		TeleS:TeleportAsync(WORLDS.CSCA, { plr }, teleportOptions)
-
-	elseif option == "JoinPrivate" and privateCode == "TACO" then
-		_teleportPrivateTests("TestDeep", 3, plr, teleportOptions)
-
-	elseif option == "JoinPrivate" and privateCode == "FALLEN" then
-		_teleportPrivateTests("TestFront", 2, plr, teleportOptions)
-
 	elseif option == "JoinFriend" then
 		local success, errorMsg = pcall(function()
 			local visitorId = privateCode
-			local ok, _, errorText, placeId, jobId = pcall(function()
+			local ok, _, _, placeId, jobId = pcall(function()
 				return TeleS:GetPlayerPlaceInstanceAsync(visitorId)
 			end)
 

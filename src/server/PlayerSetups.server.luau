@@ -6,6 +6,7 @@ local DSS = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local RepS = game:GetService("ReplicatedStorage")
 local SSS = game:GetService("ServerScriptService")
+local TeleS = game:GetService("TeleportService")
 
 local Events = require(SSS.Modules.Data.ServerEvents)
 local HarukaLib = require(RepS.Modules.Packages.HarukaLib)
@@ -45,21 +46,30 @@ end
 local function setup(plr: Player)
 	local joinData = plr:GetJoinData().TeleportData :: table?
 
-	local data1, data2, data3
-	if joinData then
-		if plr:GetJoinData().SourcePlaceId == 7523159032 then
-			data1 = joinData[1]; data2 = joinData[2]; data3 = joinData[3]
-		end
-	else
-		local ds, ds2, ds3 =
-			DSS:GetDataStore(DATASTORES[1]),
-			DSS:GetDataStore(DATASTORES[2]),
-			DSS:GetDataStore(DATASTORES[3])
+	local ds, ds2, ds3 =
+		DSS:GetDataStore(DATASTORES[1]),
+		DSS:GetDataStore(DATASTORES[2]),
+		DSS:GetDataStore(DATASTORES[3])
 
-		data1 = ds:GetAsync(plr.UserId); data2 = ds2:GetAsync(plr.UserId); data3 = ds3:GetAsync(plr.UserId)
-	end
+	local data1, data2, data3 =
+		ds:GetAsync(plr.UserId),
+		ds2:GetAsync(plr.UserId),
+		ds3:GetAsync(plr.UserId)
 
 	local datas = { data1 or TEMPLATE, data2 or TEMPLATE, data3 or TEMPLATE }
+
+	if joinData then
+		if plr:GetJoinData().SourcePlaceId == 7523159032 then
+			for i = 1, 3 do
+				pcall(function()
+					if not datas[i].Stats.V8Transfered then
+						datas[i] = joinData[i]
+						datas[i].Stats.V8Transfered = true
+					end
+				end)
+			end
+		end
+	end
 
 	_reconcile(datas[1], TEMPLATE)
 	_reconcile(datas[2], TEMPLATE)
@@ -79,23 +89,38 @@ local function setup(plr: Player)
 	end
 
 	--// Check if banned
-	for i = 1, 3 do
-		if not datas[i] then return end
+	Spawn(function()
+		for i = 1, 3 do
+			local banInfo = datas[i].BanStats :: table
+			if banInfo.IsBanned then
+				local timeGap = (time() - banInfo.BannedTime) / 60 / 60
 
-		local banInfo = datas[i].BanStats :: table
-		if banInfo.IsBanned then
-			local timeGap = (time() - banInfo.BannedTime) / 60 / 60
+				if timeGap < banInfo.Duration then
+					local durationLeft = format("%.1f", tostring(banInfo.Duration - timeGap))
 
-			if timeGap < banInfo.Duration then
-				local durationLeft = format("%.1f", tostring(banInfo.Duration - timeGap))
-
-				plr:Kick("You got banned! Reason: "..banInfo.Reason..", unban in "..durationLeft.." hours!")
-			else
-				--// unban
-				datas[i].BanStats = TEMPLATE.BanStats
+					plr:Kick("You got banned! Reason: "..banInfo.Reason..", unban in "..durationLeft.." hours!")
+				else
+					--// unban
+					datas[i].BanStats = TEMPLATE.BanStats
+				end
 			end
 		end
-	end
+	end)
+
+	--// Check if transfered
+	Spawn(function()
+		local check = true
+		for i = 1, 3 do
+			if not datas[i].Stats.V8Transfered then check = false end
+		end
+
+		if not check then
+			Events.CreateHint:Fire(plr, "Teleporting to legacy place...")
+
+			TeleS:Teleport(7523159032, plr)
+		end
+	end)
+
 end
 local function clear(plr: Player)
 	if not playerDatas[plr.Name] then return end
@@ -132,6 +157,7 @@ local function wipeData(plr: Player, slot: string)
 	end
 
 	playerDatas[plr.Name][realSlot] = TEMPLATE
+	playerDatas[plr.Name][realSlot].Stats.V8Transfered = true
 
 	plr:Kick("Data has wiped, rejoin to continue!")
 end

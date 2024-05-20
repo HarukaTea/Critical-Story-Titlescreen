@@ -9,6 +9,8 @@ return {
 
 		Class = "Warrior",
 		LastSeenLocation = "MonolithVillage",
+
+		V8Transfered = false
 	},
 
 	BanStats = {
