@@ -10,7 +10,7 @@ return {
 		Class = "Warrior",
 		LastSeenLocation = "MonolithVillage",
 
-		V8Transfered = false
+		V8Transfered2 = false
 	},
 
 	BanStats = {
@@ -20,7 +20,7 @@ return {
 		Reason = ""
 	},
 
-	Quests = {
+	QuestsV2 = {
 		Main = 1,
 		Town = {}
 	}
