@@ -1,6 +1,4 @@
 --!nocheck
---!optimize 2
---!native
 
 local DSS = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
@@ -63,9 +61,9 @@ local function setup(plr: Player)
 		if plr:GetJoinData().SourcePlaceId == 7523159032 then
 			for i = 1, 3 do
 				pcall(function()
-					if not datas[i].Stats.V8Transfered2 then
+					if not datas[i].Stats.V8Transfered then
 						datas[i] = joinData[i]
-						datas[i].Stats.V8Transfered2 = true
+						datas[i].Stats.V8Transfered = true
 					end
 				end)
 			end
@@ -78,7 +76,7 @@ local function setup(plr: Player)
 
 	playerDatas[plr.Name] = datas
 
-	local blacklist = { "LastLeave", "LastLocation", "V1Transfered", "V2Transfered", "V8Transfered" }
+	local blacklist = { "LastLeave", "LastLocation", "V1Transfered", "V2Transfered", "V8Transfered", "V8Transfered2" }
 	for index: number, data: table in datas do
 		for attr: string, val: any in data.Stats do
 			if tFind(blacklist, attr) then continue end
@@ -86,7 +84,7 @@ local function setup(plr: Player)
 			plr:SetAttribute("DATA"..index..""..attr, HarukaLib:Deserialize(val))
 		end
 
-		plr:SetAttribute("DATA"..index.."StoryId", data.QuestsV2.Main)
+		plr:SetAttribute("DATA"..index.."StoryId", data.Quests.Main)
 
 		--// Done
 		plr:SetAttribute("PlayerDataLoaded"..index, true)
@@ -115,7 +113,7 @@ local function setup(plr: Player)
 	Spawn(function()
 		local check = true
 		for i = 1, 3 do
-			if not datas[i].Stats.V8Transfered2 then check = false end
+			if not datas[i].Stats.V8Transfered then check = false end
 		end
 
 		if not check then
@@ -161,7 +159,7 @@ local function wipeData(plr: Player, slot: string)
 	end
 
 	playerDatas[plr.Name][realSlot] = TEMPLATE
-	playerDatas[plr.Name][realSlot].Stats.V8Transfered2 = true
+	playerDatas[plr.Name][realSlot].Stats.V8Transfered = true
 
 	plr:Kick("Data has wiped, rejoin to continue!")
 end
