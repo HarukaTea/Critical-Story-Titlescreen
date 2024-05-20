@@ -18,7 +18,7 @@ return {
 		Reason = ""
 	},
 
-	QuestsV2 = {
+	Quests = {
 		Main = 1,
 		Town = {}
 	}

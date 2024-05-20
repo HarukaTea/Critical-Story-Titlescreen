@@ -14,7 +14,6 @@ local Spawn = require(RepS.Modules.Packages.Spawn)
 local playerDatas = {}
 
 local format, match = string.format, string.match
-local tFind = table.find
 local time = os.time
 
 local DATASTORES = require(SSS.Modules.Data.DataStoreTemplate)
@@ -44,15 +43,21 @@ local function _reconcile(data: table, template: table)
 end
 
 local function setup(plr: Player)
-	local ds, ds2, ds3 =
-		DSS:GetDataStore(DATASTORES[1]),
-		DSS:GetDataStore(DATASTORES[2]),
-		DSS:GetDataStore(DATASTORES[3])
+	local joinData = plr:GetJoinData().TeleportData :: table?
 
-	local data1, data2, data3 =
-		ds:GetAsync(plr.UserId),
-		ds2:GetAsync(plr.UserId),
-		ds3:GetAsync(plr.UserId)
+	local data1, data2, data3
+	if joinData then
+		if plr:GetJoinData().SourcePlaceId == 7523159032 then
+			data1 = joinData[1]; data2 = joinData[2]; data3 = joinData[3]
+		end
+	else
+		local ds, ds2, ds3 =
+			DSS:GetDataStore(DATASTORES[1]),
+			DSS:GetDataStore(DATASTORES[2]),
+			DSS:GetDataStore(DATASTORES[3])
+
+		data1 = ds:GetAsync(plr.UserId); data2 = ds2:GetAsync(plr.UserId); data3 = ds3:GetAsync(plr.UserId)
+	end
 
 	local datas = { data1 or TEMPLATE, data2 or TEMPLATE, data3 or TEMPLATE }
 
@@ -62,15 +67,12 @@ local function setup(plr: Player)
 
 	playerDatas[plr.Name] = datas
 
-	local blacklist = { "LastLeave", "V1Transfered", "V2Transfered" }
 	for index: number, data: table in datas do
 		for attr: string, val: any in data.Stats do
-			if tFind(blacklist, attr) then continue end
-
 			plr:SetAttribute("DATA"..index..""..attr, HarukaLib:Deserialize(val))
 		end
 
-		plr:SetAttribute("DATA"..index.."StoryId", data.QuestsV2.Main)
+		plr:SetAttribute("DATA"..index.."StoryId", data.Quests.Main)
 
 		--// Done
 		plr:SetAttribute("PlayerDataLoaded"..index, true)
