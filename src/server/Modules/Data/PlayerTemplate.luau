@@ -6,5 +6,6 @@ return {
 		PlayTime = 0,
 
 		Class = "Warrior",
+		LvPoints = 0
 	}
 }

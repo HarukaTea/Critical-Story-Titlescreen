@@ -38,6 +38,9 @@ local function _reconcile(data: table, template: table)
 		end
 	end
 end
+local function _oldDataTransfer(data: table)
+	data.Stats.LvPoints = (data.Stats.Levels - 1) * 2
+end
 
 local function setup(plr: Player)
 	local ds, ds2, ds3 =
@@ -55,6 +58,10 @@ local function setup(plr: Player)
 	_reconcile(datas[1], TEMPLATE)
 	_reconcile(datas[2], TEMPLATE)
 	_reconcile(datas[3], TEMPLATE)
+
+	_oldDataTransfer(datas[1])
+	_oldDataTransfer(datas[2])
+	_oldDataTransfer(datas[3])
 
 	plr:SetAttribute("PlayerDataLoaded", true)
 
