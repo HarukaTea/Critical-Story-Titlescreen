@@ -1,24 +1,20 @@
 --!nocheck
---!optimize 2
---!native
 
 local DSS = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local RepS = game:GetService("ReplicatedStorage")
 local SSS = game:GetService("ServerScriptService")
+local TeleS = game:GetService("TeleportService")
 
-local Events = require(SSS.Modules.Data.ServerEvents)
-local HarukaLib = require(RepS.Modules.Packages.HarukaLib)
 local Spawn = require(RepS.Modules.Packages.Spawn)
-
-local playerDatas = {}
-
-local format, match = string.format, string.match
-local tFind = table.find
-local time = os.time
 
 local DATASTORES = require(SSS.Modules.Data.DataStoreTemplate)
 local TEMPLATE = require(SSS.Modules.Data.PlayerTemplate)
+
+local instanceNew = Instance.new
+local wait = task.wait
+
+local NEW_WORLD = 17553728743
 
 
 local function _deepCopyTable(t: table) : table
@@ -60,57 +56,13 @@ local function setup(plr: Player)
 	_reconcile(datas[2], TEMPLATE)
 	_reconcile(datas[3], TEMPLATE)
 
-	playerDatas[plr.Name] = datas
+	plr:SetAttribute("PlayerDataLoaded", true)
 
-	local blacklist = { "LastLeave", "V1Transfered", "V2Transfered" }
-	for index: number, data: table in datas do
-		for attr: string, val: any in data.Stats do
-			if tFind(blacklist, attr) then continue end
+	wait(5)
+	local teleportOptions = instanceNew("TeleportOptions")
+	teleportOptions:SetTeleportData(datas)
 
-			plr:SetAttribute("DATA"..index..""..attr, HarukaLib:Deserialize(val))
-		end
-
-		plr:SetAttribute("DATA"..index.."StoryId", data.QuestsV2.Main)
-
-		--// Done
-		plr:SetAttribute("PlayerDataLoaded"..index, true)
-	end
-
-	--// Check if banned
-	for i = 1, 3 do
-		if not datas[i] then return end
-
-		local banInfo = datas[i].BanStats :: table
-		if banInfo.IsBanned then
-			local timeGap = (time() - banInfo.BannedTime) / 60 / 60
-
-			if timeGap < banInfo.Duration then
-				local durationLeft = format("%.1f", tostring(banInfo.Duration - timeGap))
-
-				plr:Kick("You got banned! Reason: "..banInfo.Reason..", unban in "..durationLeft.." hours!")
-			else
-				--// unban
-				datas[i].BanStats = TEMPLATE.BanStats
-			end
-		end
-	end
-end
-local function clear(plr: Player)
-	if not playerDatas[plr.Name] then return end
-
-	local datas = playerDatas[plr.Name] :: table
-
-	pcall(function()
-		DSS:GetDataStore(DATASTORES[1]):SetAsync(plr.UserId, datas[1])
-	end)
-	pcall(function()
-		DSS:GetDataStore(DATASTORES[2]):SetAsync(plr.UserId, datas[2])
-	end)
-	pcall(function()
-		DSS:GetDataStore(DATASTORES[3]):SetAsync(plr.UserId, datas[3])
-	end)
-
-	playerDatas[plr.Name] = nil
+	TeleS:TeleportAsync(NEW_WORLD, { plr }, teleportOptions)
 end
 
 ---// Setups
@@ -118,19 +70,3 @@ for _, plr: Player in Players:GetPlayers() do Spawn(setup, plr) end
 
 --// Connections
 Players.PlayerAdded:Connect(setup)
-Players.PlayerRemoving:Connect(clear)
-
-
-local function wipeData(plr: Player, slot: string)
-	local realSlot = tonumber(match(slot, "%d"))
-
-	if not realSlot then
-		Events.CreateHint:Fire(plr, "Error occured when wiping data!")
-		return
-	end
-
-	playerDatas[plr.Name][realSlot] = TEMPLATE
-
-	plr:Kick("Data has wiped, rejoin to continue!")
-end
-Events.DataWipe:Connect(wipeData)

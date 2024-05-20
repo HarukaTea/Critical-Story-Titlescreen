@@ -1,32 +1,14 @@
 --!nocheck
---!optimize 2
---!native
 
-local RepS = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
 
-local HarukaLib = require(RepS.Modules.Packages.HarukaLib)
+local plr = Players.LocalPlayer
 
-local camera = workspace.CurrentCamera
+local wait = task.wait
 
-local instanceNew = Instance.new
-local cfAngles = CFrame.Angles
-local rad = math.rad
+local function disableDefaultFreecam()
+    repeat wait() until plr.PlayerGui:WaitForChild("Freecam", 999)
 
---// Setups
-
-local function blurSetup()
-    local blur = instanceNew("BlurEffect")
-    blur.Name = "UIBlur"
-    blur.Size = 10
-    blur.Parent = camera
+    plr.PlayerGui.Freecam:Destroy()
 end
-blurSetup()
-
-local function skyballSetup()
-    local skyball = workspace:WaitForChild("Maps", 999).TimeDomain.Models.Skyball :: Model
-
-    HarukaLib.Clock(0.01, function()
-        skyball:PivotTo(skyball.PrimaryPart.CFrame * cfAngles(0, rad(0.1), 0))
-    end)
-end
-skyballSetup()
+disableDefaultFreecam()

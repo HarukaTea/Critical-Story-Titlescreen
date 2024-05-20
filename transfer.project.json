@@ -26,9 +26,7 @@
             "$properties": {
                 "CameraMaxZoomDistance": 64,
                 "CameraMinZoomDistance": 5,
-                "CharacterWalkSpeed": 0,
-                "EnableDynamicHeads": "Disabled",
-                "UserEmotesEnabled": false,
+                "CharacterWalkSpeed": 16,
                 "CharacterUseJumpPower": true
             }
         },
