@@ -9,10 +9,10 @@ local TeleS = game:GetService("TeleportService")
 local Spawn = require(RepS.Modules.Packages.Spawn)
 
 local DATASTORES = require(SSS.Modules.Data.DataStoreTemplate)
-local TEMPLATE = require(SSS.Modules.Data.PlayerTemplate)
 
 local instanceNew = Instance.new
 local wait = task.wait
+local max = math.max
 
 local NEW_WORLD = 17553728743
 
@@ -29,78 +29,190 @@ local function setup(plr: Player)
 		ds3:GetAsync(plr.UserId),
 		ds4:GetAsync("Player_"..plr.UserId)
 
-	local datas = { data1 or TEMPLATE, data2 or TEMPLATE, data3 or TEMPLATE, data4 }
-	local realDatas = { TEMPLATE, TEMPLATE, TEMPLATE }
-	--- v0.7 v1
-	for i = 1, 3 do
-		realDatas[i].Stats.Class = datas[i].Stats.Class or "Warrior"
-		realDatas[i].Stats.DmgPoints = datas[i].Stats.DmgPoints or 0
-		realDatas[i].Stats.EXP = datas[i].Stats.EXP or 0
-		realDatas[i].Stats.Gold = datas[i].Stats.Gold or 0
-		realDatas[i].Stats.HealthPoints = datas[i].Stats.HealthPoints or 0
-		realDatas[i].Stats.Levels = datas[i].Stats.Levels or 1
-		realDatas[i].Stats.LvPoints = datas[i].Stats.LvPoints or 0
-		realDatas[i].Stats.MagicPoints = datas[i].Stats.MagicPoints or 0
-		realDatas[i].Stats.ManaPoints = datas[i].Stats.ManaPoints or 0
-		realDatas[i].Stats.PlayTime = datas[i].Stats.PlayTime or 0
-		realDatas[i].Stats.RP = datas[i].Stats.RP or 0
-		realDatas[i].Stats.ShieldPoints = datas[i].Stats.ShieldPoints or 0
-	end
-	--- v0.7 v2
-	for i = 1, 3 do
-		if not datas[i].StatsV2 then continue end
+	local realDatas = {}
 
-		realDatas[i].Stats.Class = datas[i].StatsV2.Class or "Warrior"
-		realDatas[i].Stats.DmgPoints = datas[i].StatsV2.DMGPoints or 0
-		realDatas[i].Stats.EXP = datas[i].StatsV2.EXP or 0
-		realDatas[i].Stats.Gold = datas[i].StatsV2.Gold or 0
-		realDatas[i].Stats.HealthPoints = datas[i].StatsV2.HealthPoints or 0
-		realDatas[i].Stats.Levels = datas[i].StatsV2.Levels or 1
-		realDatas[i].Stats.LvPoints = datas[i].StatsV2.LvPoints or 0
-		realDatas[i].Stats.MagicPoints = datas[i].StatsV2.MagicPoints or 0
-		realDatas[i].Stats.ManaPoints = datas[i].StatsV2.ManaPoints or 0
-		realDatas[i].Stats.PlayTime = datas[i].StatsV2.PlayTime or 0
-		realDatas[i].Stats.RP = datas[i].StatsV2.RP or 0
-		realDatas[i].Stats.ShieldPoints = datas[i].StatsV2.ShieldPoints or 0
-	end
-	--- v0.6 old
-	pcall(function()
-		if datas[4] and datas[4].Data then
-			realDatas[1].Stats.Gold += datas[4].Data.Gold
-			realDatas[1].Stats.Levels += datas[4].Data.Level
-			realDatas[1].Stats.PlayTime += datas[4].Data.PlayTime
+	---// save1
+	local ok, errorMsg = pcall(function()
+		if not data1 then return end
+
+		local info = { Stats = {}, Inventory = {} }
+
+		--// v0.7 v1
+		if data1.Stats then
+			info.Stats.Class = data1.Stats.Class or "Warrior"
+			info.Stats.EXP = data1.Stats.EXP or 0
+			info.Stats.Gold = data1.Stats.Gold or 0
+			info.Stats.Levels = data1.Stats.Levels or 1
+			info.Stats.LvPoints = (data1.Stats.Levels - 1) * 2 or 0
+			info.Stats.PlayTime = data1.Stats.PlayTime or 0
+			info.Stats.RP = data1.Stats.RP or 0
 		end
+
+		--// v0.7 v2
+		if data1.StatsV2 then
+			info.Stats.Class = data1.StatsV2.Class or "Warrior"
+			info.Stats.EXP = data1.StatsV2.EXP or 0
+			info.Stats.Gold = max(data1.StatsV2.Gold or 0, info.Stats.Gold or 0)
+			info.Stats.Levels = max(data1.StatsV2.Levels or 1, info.Stats.Levels or 0)
+			info.Stats.LvPoints = (data1.StatsV2.Levels - 1) * 2 or 0
+			info.Stats.PlayTime = max(data1.StatsV2.PlayTime or 0, info.Stats.PlayTime or 0)
+			info.Stats.RP = data1.StatsV2.RP or 0
+		end
+
+		--// v0.6
+		if data4 and data4.Data then
+			info.Stats.Gold += data4.Data.Gold or 0
+			info.Stats.Levels += (data4.Data.Level - 1) or 0
+			info.Stats.PlayTime += data4.Data.PlayTime or 0
+		end
+
+		--// v0.7 inventory v1
+		if data1.Inventory then
+			for item: string, amount: number in data1.Inventory do
+				local itemInfo = {
+					Amount = amount or 0,
+					Equipped = false,
+					Pinned = false,
+					Slot = "None"
+				}
+				info.Inventory[item] = itemInfo
+			end
+		end
+
+		--// v0.7 inventory v2
+		if data1.InventoryV2 then
+			for item: string, itemInfo: table in data1.InventoryV2 do
+				local newInfo = {
+					Amount = itemInfo.Amount or 0,
+					Equipped = itemInfo.Equipped or false,
+					Pinned = itemInfo.Pinned or false,
+					Slot = itemInfo.Slot or "None"
+				}
+				data1.Inventory[item] = newInfo
+			end
+		end
+
+		realDatas[1] = info
 	end)
+	if not ok then warn("S1: "..errorMsg) end
 
-	--- v0.7 inventory
-	for i = 1, 3 do
-		if not datas[i].Inventory then continue end
+	---// save2
+	ok, errorMsg = pcall(function()
+		if not data2 then return end
 
-		for item: string, amount: number in datas[i].Inventory do
-			local info = {
-				Amount = amount,
-				Equipped = false,
-				Pinned = false,
-				Slot = "None"
-			}
-			realDatas[i].Inventory[item] = info
+		local info = { Stats = {}, Inventory = {} }
+
+		--// v0.7 v1
+		if data2.Stats then
+			info.Stats.Class = data2.Stats.Class or "Warrior"
+			info.Stats.EXP = data2.Stats.EXP or 0
+			info.Stats.Gold = data2.Stats.Gold or 0
+			info.Stats.Levels = data2.Stats.Levels or 1
+			info.Stats.LvPoints = (data2.Stats.Levels - 1) * 2 or 0
+			info.Stats.PlayTime = data2.Stats.PlayTime or 0
+			info.Stats.RP = data2.Stats.RP or 0
 		end
-	end
-	--- v0.7 v2 inventory
-	for i = 1, 3 do
-		if not datas[i].InventoryV2 then continue end
 
-		for item: string, info: table in datas[i].InventoryV2 do
-			local newInfo = {
-				Amount = info.Amount,
-				Equipped = info.Equipped,
-				Pinned = info.Pinned,
-				Slot = info.Slot
-			}
-			realDatas[i].Inventory[item] = newInfo
+		--// v0.7 v2
+		if data2.StatsV2 then
+			info.Stats.Class = data2.StatsV2.Class or "Warrior"
+			info.Stats.EXP = data2.StatsV2.EXP or 0
+			info.Stats.Gold = max(data2.StatsV2.Gold or 0, info.Stats.Gold or 0)
+			info.Stats.Levels = max(data2.StatsV2.Levels or 1, info.Stats.Levels or 0)
+			info.Stats.LvPoints = (data2.StatsV2.Levels - 1) * 2 or 0
+			info.Stats.PlayTime = max(data2.StatsV2.PlayTime or 0, info.Stats.PlayTime or 0)
+			info.Stats.RP = data2.StatsV2.RP or 0
 		end
-	end
 
+		--// v0.7 inventory v1
+		if data2.Inventory then
+			for item: string, amount: number in data2.Inventory do
+				local itemInfo = {
+					Amount = amount or 0,
+					Equipped = false,
+					Pinned = false,
+					Slot = "None"
+				}
+				info.Inventory[item] = itemInfo
+			end
+		end
+
+		--// v0.7 inventory v2
+		if data2.InventoryV2 then
+			for item: string, itemInfo: table in data2.InventoryV2 do
+				local newInfo = {
+					Amount = itemInfo.Amount or 0,
+					Equipped = itemInfo.Equipped or false,
+					Pinned = itemInfo.Pinned or false,
+					Slot = itemInfo.Slot or "None"
+				}
+				data2.Inventory[item] = newInfo
+			end
+		end
+
+		realDatas[2] = info
+	end)
+	if not ok then warn("S2: "..errorMsg) end
+
+	---// save3
+	ok, errorMsg = pcall(function()
+		if not data3 then return end
+
+		local info = { Stats = {}, Inventory = {} }
+
+		--// v0.7 v1
+		if data3.Stats then
+			info.Stats.Class = data3.Stats.Class or "Warrior"
+			info.Stats.EXP = data3.Stats.EXP or 0
+			info.Stats.Gold = data3.Stats.Gold or 0
+			info.Stats.Levels = data3.Stats.Levels or 1
+			info.Stats.LvPoints = (data3.Stats.Levels - 1) * 2 or 0
+			info.Stats.PlayTime = data3.Stats.PlayTime or 0
+			info.Stats.RP = data3.Stats.RP or 0
+		end
+
+		--// v0.7 v2
+		if data3.StatsV2 then
+			info.Stats.Class = data3.StatsV2.Class or "Warrior"
+			info.Stats.EXP = data3.StatsV2.EXP or 0
+			info.Stats.Gold = max(data3.StatsV2.Gold or 0, info.Stats.Gold or 0)
+			info.Stats.Levels = max(data3.StatsV2.Levels or 1, info.Stats.Levels or 0)
+			info.Stats.LvPoints = (data3.StatsV2.Levels - 1) * 2 or 0
+			info.Stats.PlayTime = max(data3.StatsV2.PlayTime or 0, info.Stats.PlayTime or 0)
+			info.Stats.RP = data3.StatsV2.RP or 0
+		end
+
+		--// v0.7 inventory v1
+		if data3.Inventory then
+			for item: string, amount: number in data3.Inventory do
+				local itemInfo = {
+					Amount = amount or 0,
+					Equipped = false,
+					Pinned = false,
+					Slot = "None"
+				}
+				info.Inventory[item] = itemInfo
+			end
+		end
+
+		--// v0.7 inventory v2
+		if data3.InventoryV2 then
+			for item: string, itemInfo: table in data3.InventoryV2 do
+				local newInfo = {
+					Amount = itemInfo.Amount or 0,
+					Equipped = itemInfo.Equipped or false,
+					Pinned = itemInfo.Pinned or false,
+					Slot = itemInfo.Slot or "None"
+				}
+				data3.Inventory[item] = newInfo
+			end
+		end
+
+		realDatas[3] = info
+	end)
+	if not ok then warn("S3: "..errorMsg) end
+
+	print(realDatas)
 	plr:SetAttribute("PlayerDataLoaded", true)
 
 	wait(5)
