@@ -24,25 +24,6 @@ local loadFinished = false
 RF:RemoveDefaultLoadingScreen()
 SG:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
 
---// Disable reset button
-spawn(function()
-    UIS.ModalEnabled = true
-
-    local coreCall do
-        local MAX_RETRIES = 99999
-
-        function coreCall(method, ...)
-            local result = {}
-            for _ = 1, MAX_RETRIES do
-                result = { pcall(SG[method], SG, ...) }
-                if result[1] then break end
-                RS.Stepped:Wait()
-            end
-            return unpack(result)
-        end
-    end
-    coreCall("SetCore", "ResetButtonCallback", false)
-end)
 
 ---// create a default blackscreen before fusion loads
 local ui = newInstance("ScreenGui")

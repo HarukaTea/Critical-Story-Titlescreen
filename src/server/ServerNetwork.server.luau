@@ -9,9 +9,9 @@ local TeleS = game:GetService("TeleportService")
 local Events = require(SSS.Modules.Data.ServerEvents)
 local Spawn = require(RepS.Modules.Packages.Spawn)
 
-local CODE = { "MILKSHAKE", "GENSHIN", "FAKECW", "STRIKE", "TACO", "FALLEN" }
+local CODE = { "MILKSHAKE" }
 local WORLDS = {
-	MainWorld = 17553948946, TestNormal = 17553875545
+	MainWorld = 12343565896, TestNormal = 17444533020
 }
 
 local instanceNew = Instance.new
@@ -19,9 +19,7 @@ local tFind = table.find
 local wait = task.wait
 
 local function _teleportPrivateTests(id: string, rankNeeded: number, plr: Player, tpOptions: TeleportOptions)
-	local _, _, groups, rank = pcall(function()
-		return GS:GetGroupsAsync(plr.UserId), 0
-	end)
+	local groups, rank = GS:GetGroupsAsync(plr.UserId), 0
 
 	for _, group: table in groups do
 		if group.Id == 16912246 then rank = group.Rank end
@@ -30,7 +28,7 @@ local function _teleportPrivateTests(id: string, rankNeeded: number, plr: Player
 	if rank >= rankNeeded then
 		TeleS:TeleportAsync(WORLDS[id], { plr }, tpOptions)
 	else
-		Events.CreateHint:Fire(plr, "You don't have the permission to join test place!", "Error")
+		Events.CreateHint:Fire(plr, "You don't have the permission to join test place!")
 		Events.TeleportFailed:Fire(plr)
 	end
 end
@@ -86,31 +84,6 @@ local function teleportHandler(plr: Player, option: string, privateCode: string,
 
 	elseif option == "JoinPrivate" and privateCode == "MILKSHAKE" then
 		_teleportPrivateTests("TestNormal", 2, plr, teleportOptions)
-
-	elseif option == "JoinFriend" then
-		local success, errorMsg = pcall(function()
-			local visitorId = privateCode
-			local ok, _, _, placeId, jobId = pcall(function()
-				return TeleS:GetPlayerPlaceInstanceAsync(visitorId)
-			end)
-
-			if not ok then
-				Events.CreateHint:Fire(plr, "Can't join your friend right now!")
-				Events.CreateHint:Fire(plr, "Try again later!")
-
-				Events.TeleportFailed:Fire(plr)
-			end
-			teleportOptions.ServerInstanceId = jobId
-
-			TeleS:TeleportAsync(placeId, { plr }, teleportOptions)
-		end)
-
-		if not success then
-			Events.CreateHint:Fire(plr, "Error occurred when attempting to join your friend!")
-			Events.TeleportFailed:Fire(plr)
-		end
-
-		warn(errorMsg)
 	end
 end
 Events.TeleportPrompt:Connect(teleportHandler)

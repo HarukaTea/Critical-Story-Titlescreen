@@ -37,7 +37,6 @@ local function setup()
 
         clonedChar.Parent = container
 
-        clonedChar.Animate:Destroy()
         clonedChar:WaitForChild("Humanoid"):LoadAnimation(RepS.Package.Idle):Play()
     end
 end

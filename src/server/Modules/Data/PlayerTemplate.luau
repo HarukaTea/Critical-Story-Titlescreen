@@ -8,17 +8,12 @@ return {
 		Class = "Warrior",
 		LastSeenLocation = "MonolithVillage",
 
-		V8Transfered = false
+		V9Transfered = false
 	},
 
-	BanStats = {
-		IsBanned = false,
-		Duration = 0,
-		BannedTime = 0,
-		Reason = ""
-	},
+	Inventory = {},
 
-	Quests = {
+	QuestsV2 = {
 		Main = 1,
 		Town = {}
 	}
