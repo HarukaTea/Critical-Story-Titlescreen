@@ -93,6 +93,18 @@ local function setup(plr: Player)
 						}
 
 						info.Inventory[item] = itemInfo
+
+						--- testers history issues...
+						if type(amount) == "table" then
+							itemInfo = {
+								Amount = amount.Amount or 0,
+								Equipped = false,
+								Pinned = false,
+								Slot = "None"
+							}
+
+							info.Inventory[item] = itemInfo
+						end
 					end
 				end
 
