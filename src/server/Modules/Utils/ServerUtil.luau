@@ -1,9 +1,6 @@
 --!nocheck
 
-local RepS = game:GetService("ReplicatedStorage")
-
-local cfNew, instanceNew, v3New = CFrame.new, Instance.new, Vector3.new
-local sFind = string.find
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local ServerUtil = {}
 
@@ -11,18 +8,20 @@ function ServerUtil:WeldPart(part: Part, welded: Model)
 	local C = welded:GetChildren()
 	for i = 1, #C do
 		if C[i]:IsA("BasePart") or C[i]:IsA("UnionOperation") or C[i]:IsA("CornerWedgePart") then
-			local W = instanceNew("Weld")
+			local W = Instance.new("Weld")
 			W.Part0 = welded.Middle
 			W.Part1 = C[i]
-			local CJ = cfNew(welded.Middle.Position)
+
+			local CJ = CFrame.new(welded.Middle.Position)
 			W.C0 = welded.Middle.CFrame:Inverse() * CJ
 			W.C1 = C[i].CFrame:Inverse() * CJ
 			W.Parent = welded.Middle
 		end
-		local Y = instanceNew("Weld")
+
+		local Y = Instance.new("Weld")
 		Y.Part0 = part
 		Y.Part1 = welded.Middle
-		Y.C0 = cfNew(v3New())
+		Y.C0 = CFrame.new(Vector3.zero)
 		Y.Parent = Y.Part0
 	end
 
@@ -33,10 +32,10 @@ function ServerUtil:WeldPart(part: Part, welded: Model)
 end
 
 function ServerUtil:EquipWeapon(char: Model, class: string)
-	local styleFolder = RepS.Package.StyleWeapons[class] :: Folder
+	local styleFolder = ReplicatedStorage.Package.StyleWeapons[class] :: Folder
 
 	for _, child: Instance in char:GetChildren() do
-		if sFind(child.Name, "Weapon") then child:Destroy() end
+		if string.find(child.Name, "Weapon") then child:Destroy() end
 	end
 
 	local function _equipWeapon()

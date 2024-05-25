@@ -1,16 +1,13 @@
 --!nocheck
 
 local Players = game:GetService("Players")
-local RepS = game:GetService("ReplicatedStorage")
-local SSS = game:GetService("ServerScriptService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
 
-local ServerUtil = require(SSS.Modules.Utils.ServerUtil)
+local ServerUtil = require(ServerScriptService.Modules.Utils.ServerUtil)
 
 local char = script.Parent :: Model
 local plr = Players:GetPlayerFromCharacter(char)
-
-local wait = task.wait
-local instanceNew = Instance.new
 
 local function setup()
     repeat wait() until plr:GetAttribute("PlayerDataLoaded1")
@@ -21,7 +18,7 @@ local function setup()
 
     ServerUtil:SetCollisionGroup(char, "Player")
 
-    local container = instanceNew("Folder")
+    local container = Instance.new("Folder")
     container.Name = plr.Name
     container.Parent = workspace.MapComponents.PlayerChars
 
@@ -37,7 +34,7 @@ local function setup()
 
         clonedChar.Parent = container
 
-        clonedChar:WaitForChild("Humanoid"):LoadAnimation(RepS.Package.Idle):Play()
+        clonedChar:WaitForChild("Humanoid"):LoadAnimation(ReplicatedStorage.Package.Idle):Play()
     end
 end
 setup()

@@ -1,19 +1,15 @@
 --!nocheck
 
-local RepS = game:GetService("ReplicatedStorage")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local HarukaLib = require(RepS.Modules.Packages.HarukaLib)
+local HarukaLib = require(ReplicatedStorage.Modules.Packages.HarukaLib)
 
 local camera = workspace.CurrentCamera
-
-local instanceNew = Instance.new
-local cfAngles = CFrame.Angles
-local rad = math.rad
 
 --// Setups
 
 local function blurSetup()
-    local blur = instanceNew("BlurEffect")
+    local blur = Instance.new("BlurEffect")
     blur.Name = "UIBlur"
     blur.Size = 10
     blur.Parent = camera
@@ -24,7 +20,7 @@ local function skyballSetup()
     local skyball = workspace:WaitForChild("Maps", 999).TimeDomain.Models.Skyball :: Model
 
     HarukaLib.Clock(0.01, function()
-        skyball:PivotTo(skyball.PrimaryPart.CFrame * cfAngles(0, rad(0.1), 0))
+        skyball:PivotTo(skyball.PrimaryPart.CFrame * CFrame.Angles(0, math.rad(0.1), 0))
     end)
 end
 skyballSetup()

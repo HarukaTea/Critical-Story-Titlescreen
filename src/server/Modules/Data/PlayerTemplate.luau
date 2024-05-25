@@ -1,20 +1,58 @@
 --!nocheck
 
 return {
-    Stats = {
-		Levels = 1,
-		PlayTime = 0,
+	{
+		Stats = {
+			Levels = 1,
+			PlayTime = 0,
 
-		Class = "Warrior",
-		LastSeenLocation = "MonolithVillage",
+			Class = "Warrior",
+			LastSeenLocation = "MonolithVillage",
 
-		V9Transfered = false
+			V9Transfered = false
+		},
+
+		Inventory = {},
+
+		QuestsV2 = {
+			Main = 1,
+			Town = {}
+		}
 	},
+	{
+		Stats = {
+			Levels = 1,
+			PlayTime = 0,
 
-	Inventory = {},
+			Class = "Warrior",
+			LastSeenLocation = "MonolithVillage",
 
-	QuestsV2 = {
-		Main = 1,
-		Town = {}
+			V9Transfered = false
+		},
+
+		Inventory = {},
+
+		QuestsV2 = {
+			Main = 1,
+			Town = {}
+		}
+	},
+	{
+		Stats = {
+			Levels = 1,
+			PlayTime = 0,
+
+			Class = "Warrior",
+			LastSeenLocation = "MonolithVillage",
+
+			V9Transfered = false
+		},
+
+		Inventory = {},
+
+		QuestsV2 = {
+			Main = 1,
+			Town = {}
+		}
 	}
 }

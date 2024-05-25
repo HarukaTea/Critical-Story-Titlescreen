@@ -1,3 +1,3 @@
 --!nocheck
 
-return { "CS_DEV1599", "CS_DEV1599_S2", "CS_DEV1599_S3", "CS-DEV13" }
+return { "CS_1599MKK", "CS_1599MKK_S2", "CS_1599MKK_S3" }

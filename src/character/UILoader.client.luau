@@ -1,13 +1,13 @@
 --!nocheck
 
 local Players = game:GetService("Players")
-local RepS = game:GetService("ReplicatedStorage")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Spawn = require(RepS.Modules.Packages.Spawn)
+local Spawn = require(ReplicatedStorage.Modules.Packages.Spawn)
 
 local plr = Players.LocalPlayer
 
-local UIModules = RepS.Modules.UI
+local UIModules = ReplicatedStorage.Modules.UI
 local requireList = {
     UIModules.Hints,
 	UIModules.TitleScreen
