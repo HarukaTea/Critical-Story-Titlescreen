@@ -4,6 +4,7 @@ local RepS = game:GetService("ReplicatedStorage")
 
 local AssetBook = require(RepS.Modules.Data.AssetBook)
 local Components = require(RepS.Modules.UI.Vanilla)
+local Events = require(RepS.Modules.Data.Events)
 local Fusion = require(RepS.Modules.Packages.Fusion)
 
 local Children, New = Fusion.Children, Fusion.New
@@ -48,7 +49,7 @@ local function FriendSlot(info: table, self: table, scope: table) : Frame
 
                     New(scope, "ImageLabel")({
                         Name = "Status",
-                        Position = fromScale(0.7, 0.6),
+                        Position = fromScale(0.7, 0.7),
                         Size = fromScale(0.3, 0.3),
                         SizeConstraint = Enum.SizeConstraint.RelativeYY,
                         ZIndex = 2,
@@ -74,6 +75,32 @@ local function FriendSlot(info: table, self: table, scope: table) : Frame
                 Text = info.LastLocation,
                 TextXAlignment = Enum.TextXAlignment.Left,
                 TextColor3 = AssetBook.friendsStatusColors[info.LocationType],
+            }),
+
+            Components.TextButton(scope, {
+                Name = "JoinBtn",
+                BackgroundColor3 = fromRGB(71, 143, 106),
+                Position = fromScale(0.83, 0.5),
+                Size = fromScale(0.15, 0.4),
+                AnchorPoint = v2New(0, 0.5),
+                Text = "JOIN",
+                Visible = if string.find(info.LastLocation, "Critical Story") then true else false,
+
+                [Fusion.OnEvent("MouseButton1Click")] = function()
+                    self.isTeleporting:set(true)
+
+                    Events.TeleportPrompt:Fire("JoinFriend", info.VisitorId, Fusion.peek(self.slotChosen))
+
+                    workspace.Sounds.SFXs.Click:Play()
+                end,
+
+                [Children] = {
+                    Components.RoundUICorner(scope),
+                    New(scope, "UIPadding")({
+                        PaddingBottom = udNew(0.1, 0),
+                        PaddingTop = udNew(0.1, 0)
+                    })
+                }
             })
         }
     })

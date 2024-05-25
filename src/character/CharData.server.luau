@@ -2,6 +2,7 @@
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
 
 local ServerUtil = require(ServerScriptService.Modules.Utils.ServerUtil)
@@ -10,9 +11,9 @@ local char = script.Parent :: Model
 local plr = Players:GetPlayerFromCharacter(char)
 
 local function setup()
-    repeat wait() until plr:GetAttribute("PlayerDataLoaded1")
-    repeat wait() until plr:GetAttribute("PlayerDataLoaded2")
-    repeat wait() until plr:GetAttribute("PlayerDataLoaded3")
+    repeat RunService.Heartbeat:Wait() until plr:GetAttribute("PlayerDataLoaded1")
+    repeat RunService.Heartbeat:Wait() until plr:GetAttribute("PlayerDataLoaded2")
+    repeat RunService.Heartbeat:Wait() until plr:GetAttribute("PlayerDataLoaded3")
 
     char.Archivable = true
 

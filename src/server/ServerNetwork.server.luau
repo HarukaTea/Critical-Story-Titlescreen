@@ -54,7 +54,7 @@ local function teleportHandler(plr: Player, option: string, privateCode: string,
 		TeleportService:TeleportAsync(WORLDS.MainWorld, { plr }, teleportOptions)
 
 	elseif option == "JoinPrivate" and not table.find(CODE, privateCode) then
-		local connection
+		local connection: RBXScriptConnection
 
 		Spawn(function()
 			task.wait(5)
@@ -77,6 +77,32 @@ local function teleportHandler(plr: Player, option: string, privateCode: string,
 		end)
 
 		MessagingService:PublishAsync("ReturnAllPrivateServers", privateCode)
+
+	elseif option == "JoinFriend" then
+		local visitorId = privateCode
+
+		local connection: RBXScriptConnection
+		Spawn(function()
+			task.wait(5)
+			if connection then
+				connection:Disconnect()
+
+				Events.CreateHint:Fire(plr, "Failed to join friend!")
+				Events.TeleportFailed:Fire(plr)
+			end
+		end)
+
+		connection = MessagingService:SubscribeAsync("JoinFriendReturn", function(message: table)
+			if message.Data[1] == visitorId then
+				teleportOptions.ServerInstanceId = message.Data[2]
+
+				TeleportService:TeleportAsync(WORLDS.MainWorld, { plr }, teleportOptions)
+
+				connection:Disconnect()
+			end
+		end)
+
+		MessagingService:PublishAsync("JoinFriendRequest", visitorId)
 
 	elseif option == "JoinPrivate" and privateCode == "MILKSHAKE" then
 		_teleportPrivateTests("TestNormal", 2, plr, teleportOptions)

@@ -119,18 +119,13 @@ local function setup(plr: Player)
 
 			end):Then(function(info: table)
 				for attr: string, val: any in info.Stats do
-					pcall(function()
-						plr:SetAttribute("DATA"..i..""..attr, HarukaLib:Deserialize(val))
-					end)
+					plr:SetAttribute("DATA"..i..""..attr, HarukaLib:Deserialize(val))
 				end
 
 				plr:SetAttribute("DATA"..i.."StoryId", info.QuestsV2.Main)
 
 				--// Done
 				plr:SetAttribute("PlayerDataLoaded"..i, true)
-
-			end):Catch(function()
-				plr:Kick("A error occured when loading datastore! Maybe contact mods for help?")
 			end)
 		end
 	else
