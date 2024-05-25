@@ -1,7 +1,7 @@
 --!nocheck
 
 return {
-	{
+	Slot1 = {
 		Stats = {
 			Levels = 1,
 			PlayTime = 0,
@@ -19,7 +19,7 @@ return {
 			Town = {}
 		}
 	},
-	{
+	Slot2 = {
 		Stats = {
 			Levels = 1,
 			PlayTime = 0,
@@ -37,7 +37,7 @@ return {
 			Town = {}
 		}
 	},
-	{
+	Slot3 = {
 		Stats = {
 			Levels = 1,
 			PlayTime = 0,

@@ -40,14 +40,14 @@ local function setup(plr: Player)
 
 		for i = 1, 3 do
 			Promise.new(function(resolve)
-				if profile.Data[i].Stats.V9Transfered then resolve(profile.Data[i]) return end
+				if profile.Data["Slot"..i].Stats.V9Transfered then resolve(profile.Data["Slot"..i]) return end
 
 				local info = { Stats = {}, Inventory = {}, QuestsV2 = { Main = 1, Town = {} } }
 
 				local data: table
-				if i == 1 then data = ds:GetAsync(plr.UserId) or TEMPLATE[1] end
-				if i == 2 then data = ds2:GetAsync(plr.UserId) or TEMPLATE[1] end
-				if i == 3 then data = ds3:GetAsync(plr.UserId) or TEMPLATE[1] end
+				if i == 1 then data = ds:GetAsync(plr.UserId) or TEMPLATE["Slot1"] end
+				if i == 2 then data = ds2:GetAsync(plr.UserId) or TEMPLATE["Slot1"] end
+				if i == 3 then data = ds3:GetAsync(plr.UserId) or TEMPLATE["Slot1"] end
 
 				--// v0.7 v1
 				if data.Stats then
@@ -125,7 +125,7 @@ local function setup(plr: Player)
 				info.Stats.LastSeenLocation = "MonolithVillage"
 				info.Stats.V9Transfered = true
 
-				profile.Data[i] = info
+				profile.Data["Slot"..i] = info
 
 				resolve(info)
 
@@ -138,6 +138,10 @@ local function setup(plr: Player)
 
 				--// Done
 				plr:SetAttribute("PlayerDataLoaded"..i, true)
+
+			end):Catch(function(err)
+				warn("Save failed to transfer...")
+				warn(err)
 			end)
 		end
 	else
@@ -162,18 +166,20 @@ Players.PlayerRemoving:Connect(clear)
 
 
 local function wipeData(plr: Player, slot: string)
-	local realSlot = tonumber(string.match(slot, "%d"))
-
-	if not realSlot then
-		Events.CreateHint:Fire(plr, "Error occured when wiping data!")
+	local profile = profiles[plr]
+	if not profile then
+		Events.CreateHint:Fire(plr, "Error occured when resetting your data!")
 		return
 	end
 
-	local profile = profiles[plr]
-	if not profile then return end
+	local whiteList = { "Slot1", "Slot2", "Slot3" } --// avoid bypass
+	if not table.find(whiteList, slot) then
+		Events.CreateHint:Fire(plr, "Error occured when resetting your data!")
+		return
+	end
 
-	profile.Data[realSlot] = TEMPLATE
-	profile.Data[realSlot].Stats.V9Transfered = true
+	profile.Data[slot] = TEMPLATE["Slot1"]
+	profile.Data[slot].Stats.V9Transfered = true
 
 	plr:Kick("Data has wiped, rejoin to continue!")
 end
