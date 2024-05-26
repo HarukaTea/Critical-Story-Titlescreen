@@ -7,11 +7,15 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local TeleportService = game:GetService("TeleportService")
 
 local Events = require(ServerScriptService.Modules.Data.ServerEvents)
+local Promise = require(ReplicatedStorage.Modules.Packages.Promise)
 local Spawn = require(ReplicatedStorage.Modules.Packages.Spawn)
 
-local CODE = { "MILKSHAKE" }
+local CODE = { "MILKSHAKE", "CE", "PAHO" }
 local WORLDS = {
-	MainWorld = 12343565896, TestNormal = 17444533020
+	Mainworld = 12343565896, PrivateTest = 12003361010, NiximCavern = 12294239008,
+	CE = 17302653565, TimeDomain = 11904003271, Everfrost = 12373196969,
+	Stronghold = 12373229403, Arkus = 13970315225, LoneTown = 16555333700,
+	SummerIsland = 17444533020
 }
 
 local function _teleportPrivateTests(id: string, rankNeeded: number, plr: Player, tpOptions: TeleportOptions)
@@ -34,7 +38,17 @@ local function teleportHandler(plr: Player, option: string, privateCode: string,
 
 	if option == "JoinPublic" then
 		task.wait(0.5)
-		TeleportService:TeleportAsync(WORLDS.MainWorld, { plr }, teleportOptions)
+		Promise.new(function()
+			local slotChosen = tonumber(string.match(dataChosen, "%d"))
+			local lastSeenWorld = plr:GetAttribute("DATA"..slotChosen.."LastSeenWorld") :: string
+
+			TeleportService:TeleportAsync(WORLDS[lastSeenWorld], { plr }, teleportOptions)
+
+		end):Catch(function(err)
+			warn("[Public Teleport]: "..err)
+
+			TeleportService:TeleportAsync(WORLDS.Mainworld, { plr }, teleportOptions)
+		end)
 
 	elseif option == "CreatePrivate" then
 		local code
@@ -105,7 +119,13 @@ local function teleportHandler(plr: Player, option: string, privateCode: string,
 		MessagingService:PublishAsync("JoinFriendRequest", visitorId)
 
 	elseif option == "JoinPrivate" and privateCode == "MILKSHAKE" then
-		_teleportPrivateTests("TestNormal", 2, plr, teleportOptions)
+		_teleportPrivateTests("PrivateTest", 2, plr, teleportOptions)
+
+	elseif option == "JoinPrivate" and privateCode == "PAHO" then
+		_teleportPrivateTests("TimeDomain", 2, plr, teleportOptions)
+
+	elseif option == "JoinPrivate" and privateCode == "CE" then
+		TeleportService:Teleport(WORLDS.CE, plr)
 	end
 end
 Events.TeleportPrompt:Connect(teleportHandler)

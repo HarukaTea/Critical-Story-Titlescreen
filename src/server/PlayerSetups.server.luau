@@ -123,6 +123,7 @@ local function setup(plr: Player)
 				end
 
 				info.Stats.LastSeenLocation = "MonolithVillage"
+				info.Stats.LastSeenWorld = "Mainworld"
 				info.Stats.V9Transfered = true
 
 				profile.Data["Slot"..i] = info

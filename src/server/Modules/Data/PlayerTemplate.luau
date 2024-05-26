@@ -8,6 +8,7 @@ return {
 
 			Class = "Warrior",
 			LastSeenLocation = "MonolithVillage",
+			LastSeenWorld = "Mainworld",
 
 			V9Transfered = false
 		},
@@ -26,6 +27,7 @@ return {
 
 			Class = "Warrior",
 			LastSeenLocation = "MonolithVillage",
+			LastSeenWorld = "Mainworld",
 
 			V9Transfered = false
 		},
@@ -44,6 +46,7 @@ return {
 
 			Class = "Warrior",
 			LastSeenLocation = "MonolithVillage",
+			LastSeenWorld = "Mainworld",
 
 			V9Transfered = false
 		},
