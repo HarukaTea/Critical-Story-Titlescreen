@@ -141,7 +141,7 @@ return function(plr: Player)
 
 			local clonedChar = workspace.MapComponents.PlayerChars[self.plr.Name]["Slot"..i]:Clone() :: Model
 			local hrp = clonedChar.PrimaryPart
-			charSelfViewSlot.CurrentCamera.CFrame = cfNew(hrp.Position + (hrp.CFrame.LookVector * 5), hrp.Position) * cfNew(0, -2, 0)
+			charSelfViewSlot.CurrentCamera.CFrame = cfNew(hrp.Position + (hrp.CFrame.LookVector * 5), hrp.Position)
 
 			clonedChar.Parent = charSelfViewSlot
 		end))

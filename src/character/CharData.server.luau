@@ -29,6 +29,7 @@ local function setup()
 
         clonedChar:PivotTo(workspace.MapComponents.SaveSlotLocators["Locator"..i].CFrame)
         clonedChar.Name = "Slot"..i
+        clonedChar.PrimaryPart = clonedChar:WaitForChild("Humanoid").RootPart
 
         ServerUtil:SetCollisionGroup(clonedChar, "ClonedCharacter")
         ServerUtil:EquipWeapon(clonedChar, plr:GetAttribute("DATA"..i.."Class"))
