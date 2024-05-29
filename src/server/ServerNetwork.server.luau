@@ -51,21 +51,25 @@ local function teleportHandler(plr: Player, option: string, privateCode: string,
 		end)
 
 	elseif option == "CreatePrivate" then
-		local code
-		local success = pcall(function()
-			code = TeleportService:ReserveServer(WORLDS.MainWorld)
-		end)
-		if not success then
+		task.wait(0.5)
+		Promise.new(function()
+			local slotChosen = tonumber(string.match(dataChosen, "%d"))
+			local lastSeenWorld = plr:GetAttribute("DATA"..slotChosen.."LastSeenWorld") :: string
+
+			local code = TeleportService:ReserveServer(WORLDS[lastSeenWorld])
+
+			teleportOptions.ReservedServerAccessCode = code
+			teleportOptions:SetTeleportData({ dataChosen, code })
+
+			TeleportService:TeleportAsync(WORLDS.MainWorld, { plr }, teleportOptions)
+
+		end):Catch(function(err)
 			Events.TeleportFailed:Fire(plr)
-
 			Events.CreateHint:Fire(plr, "Error occurred when creating private server!")
+
+			warn("[Private Create]: "..err)
 			return
-		end
-
-		teleportOptions.ReservedServerAccessCode = code
-		teleportOptions:SetTeleportData({ dataChosen, code })
-
-		TeleportService:TeleportAsync(WORLDS.MainWorld, { plr }, teleportOptions)
+		end)
 
 	elseif option == "JoinPrivate" and not table.find(CODE, privateCode) then
 		local connection: RBXScriptConnection

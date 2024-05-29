@@ -32,15 +32,5 @@ local function clearDebris()
 
     task.wait()
     plr.PlayerGui.Freecam:Destroy()
-
-    repeat task.wait() until plr.PlayerGui:FindFirstChild("BubbleChat")
-
-    task.wait()
-    plr.PlayerGui.BubbleChat:Destroy()
-
-    repeat task.wait() until plr.PlayerGui:FindFirstChild("Chat")
-
-    task.wait()
-    plr.PlayerGui.Chat:Destroy()
 end
 clearDebris()
