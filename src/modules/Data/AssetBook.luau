@@ -68,6 +68,7 @@ AssetBook.LocationInfo = {
     NorthernStronghold = "Northern Stronghold",
     AuraIsland = "Aura Islands",
     FirestoneIsland = "Firestone Islands",
+    EasterIsland = "Easter Island",
 
     --// Abandoned places
     Tundra = "Tundra",

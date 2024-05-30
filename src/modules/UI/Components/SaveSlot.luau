@@ -65,7 +65,7 @@ local function SaveSlot(index: number, self: table) : Frame
                 Name = "Class",
                 Position = fromScale(0.825, 0.018),
                 Size = fromScale(0.128, 0.1),
-                Image = AssetBook.Class[plr:GetAttribute("DATA"..index.."Class")],
+                Image = AssetBook.Class[plr:GetAttribute("DATA"..index.."Class") or "Warrior"],
 
                 Visible = if plr:GetAttribute("DATA"..index.."PlayTime") > 0 then true else false
             }),
@@ -104,7 +104,7 @@ local function SaveSlot(index: number, self: table) : Frame
                 Name = "Levels",
                 Position = fromScale(0, 0.13),
                 Size = fromScale(1, 0.06),
-                Text = "Lv."..plr:GetAttribute("DATA"..index.."Levels"),
+                Text = "Lv."..plr:GetAttribute("DATA"..index.."Levels") or 1,
                 TextXAlignment = Enum.TextXAlignment.Left,
                 TextColor3 = fromRGB(255, 255, 127),
 
@@ -116,7 +116,7 @@ local function SaveSlot(index: number, self: table) : Frame
                 Name = "PlayTime",
                 Position = fromScale(0, 0.13),
                 Size = fromScale(1, 0.06),
-                Text = format("%.1f", tostring(plr:GetAttribute("DATA"..index.."PlayTime") / 3600)).." Hours",
+                Text = format("%.1f", tostring(plr:GetAttribute("DATA"..index.."PlayTime") / 3600) or 0).." Hours",
                 TextXAlignment = Enum.TextXAlignment.Right,
                 TextColor3 = fromRGB(255, 255, 127),
 
@@ -128,7 +128,7 @@ local function SaveSlot(index: number, self: table) : Frame
                 Name = "StoryProgress",
                 Position = fromScale(0, 0.831),
                 Size = fromScale(1, 0.06),
-                Text = "Progress: "..AssetBook.StorySeries[plr:GetAttribute("DATA"..index.."StoryId")],
+                Text = "Progress: "..AssetBook.StorySeries[plr:GetAttribute("DATA"..index.."StoryId") or 1],
                 TextXAlignment = Enum.TextXAlignment.Left,
                 TextColor3 = fromRGB(170, 255, 255),
 
@@ -140,7 +140,7 @@ local function SaveSlot(index: number, self: table) : Frame
                 Name = "LastSeen",
                 Position = fromScale(0, 0.9),
                 Size = fromScale(1, 0.06),
-                Text = "Last Seen: "..AssetBook.LocationInfo[plr:GetAttribute("DATA"..index.."LastSeenLocation")],
+                Text = "Last Seen: "..AssetBook.LocationInfo[plr:GetAttribute("DATA"..index.."LastSeenLocation") or "MonolithVillage"],
                 TextXAlignment = Enum.TextXAlignment.Left,
                 TextColor3 = fromRGB(255, 170, 127),
 

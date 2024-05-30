@@ -61,7 +61,7 @@ local function teleportHandler(plr: Player, option: string, privateCode: string,
 			teleportOptions.ReservedServerAccessCode = code
 			teleportOptions:SetTeleportData({ dataChosen, code })
 
-			TeleportService:TeleportAsync(WORLDS.MainWorld, { plr }, teleportOptions)
+			TeleportService:TeleportAsync(WORLDS[lastSeenWorld], { plr }, teleportOptions)
 
 		end):Catch(function(err)
 			Events.TeleportFailed:Fire(plr)
@@ -88,7 +88,7 @@ local function teleportHandler(plr: Player, option: string, privateCode: string,
 			if message.Data[1] == privateCode then
 				teleportOptions.ReservedServerAccessCode = message.Data[2]
 
-				TeleportService:TeleportAsync(WORLDS.MainWorld, { plr }, teleportOptions)
+				TeleportService:TeleportAsync(message.Data[3], { plr }, teleportOptions)
 
 				connection:Disconnect()
 			end
@@ -114,7 +114,7 @@ local function teleportHandler(plr: Player, option: string, privateCode: string,
 			if message.Data[1] == visitorId then
 				teleportOptions.ServerInstanceId = message.Data[2]
 
-				TeleportService:TeleportAsync(WORLDS.MainWorld, { plr }, teleportOptions)
+				TeleportService:TeleportAsync(message.Data[3], { plr }, teleportOptions)
 
 				connection:Disconnect()
 			end
