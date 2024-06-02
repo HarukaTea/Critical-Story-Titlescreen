@@ -18,6 +18,7 @@ local function blurSetup()
 end
 blurSetup()
 
+
 local function skyballSetup()
     local skyball = workspace:WaitForChild("Maps", 999).TimeDomain.Models.Skyball :: Model
 
@@ -26,6 +27,7 @@ local function skyballSetup()
     end)
 end
 skyballSetup()
+
 
 local function clearDebris()
     repeat task.wait() until plr.PlayerGui:FindFirstChild("Freecam")

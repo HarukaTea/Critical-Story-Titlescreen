@@ -31,7 +31,9 @@ AssetBook.Class = {
     Repeater = "rbxassetid://12190533959",
     Striker = "rbxassetid://12190535870",
     Alchemist = "rbxassetid://12236618949",
-    Illusionist = "rbxassetid://15875390788"
+    Illusionist = "rbxassetid://15875390788",
+    Juggernaut = "rbxassetid://16654290906",
+    Reaper = "rbxassetid://17667241921"
 }
 
 AssetBook.friendsStatusColors = {
@@ -49,25 +51,11 @@ AssetBook.friendsStatusColors = {
 AssetBook.LocationInfo = {
     MonolithVillage = "Monolith Village",
     MonolithGrove = "Monolith Grove",
-
     InitusBay = "Initus Bay",
     PrimisField = "Primis Field",
-    ThyrsusForest = "Thyrsus Woods",
-    AlderForest = "Alder Forest",
     EnsisLake = "Ensis Lake",
-    SonusCave = "Sonus Cave",
-    EnsisCave = "Ensis Cave",
-    Highlands = "Highlands",
     VenatorVillage = "Venator Village",
     EnsisRiver = "Ensis River",
-    ClockTown = "Clock Town",
-    AlderTown = "Alder Town",
-    NiximEntrance = "Nixim Village",
-    NiximCliff = "Nixim Cliff",
-    NiximForest = "Nixim Forest",
-    NorthernStronghold = "Northern Stronghold",
-    AuraIsland = "Aura Islands",
-    FirestoneIsland = "Firestone Islands",
     EasterIsland = "Easter Island",
 
     --// Abandoned places
@@ -75,18 +63,33 @@ AssetBook.LocationInfo = {
     InitusVillage = "Monolith Village",
     MisniPort = "Misni Port",
     Highland = "Highland",
+    AlderForest = "Alder Forest",
+    SonusCave = "Sonus Cave",
+    EnsisCave = "Ensis Cave",
+    Highlands = "Highlands",
+    ClockTown = "Clock Town",
+    AlderTown = "Alder Town",
+    ThyrsusForest = "Thyrsus Woods",
+
+    --// Future places
+    NiximEntrance = "Nixim Village",
+    NiximCliff = "Nixim Cliff",
+    NiximForest = "Nixim Forest",
+    NorthernStronghold = "Northern Stronghold",
+    AuraIsland = "Aura Islands",
+    FirestoneIsland = "Firestone Islands",
 }
 
 AssetBook.StorySeries = {
     "The Beginning",
+    "First Steps",
     "Valiant Explorer",
-    "First Step",
+    "Critical Power",
     "The Future",
-    "The Abyss - Paho",
+    "Paho - The Executor",
     "Initus Bay",
-    "Slime Troubles",
     "The Next Journey",
-    "Misni Port",
+    "The End",
 }
 
 return AssetBook

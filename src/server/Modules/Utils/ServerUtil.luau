@@ -35,20 +35,80 @@ function ServerUtil:EquipWeapon(char: Model, class: string)
 	local styleFolder = ReplicatedStorage.Package.StyleWeapons[class] :: Folder
 
 	for _, child: Instance in char:GetChildren() do
-		if string.find(child.Name, "Weapon") then child:Destroy() end
+		if child:HasTag("Weapon") then child:Destroy() end
 	end
 
-	local function _equipWeapon()
-		local weapon = styleFolder.WeaponEquipped:Clone() :: Model
-		local weldPos = if weapon:GetAttribute("Position") then weapon:GetAttribute("Position") else "Right Arm"
+	local function _equipWeapon(weapon: Model, defaultPart: string)
+		local weldPos = if weapon:GetAttribute("Position") then weapon:GetAttribute("Position") else defaultPart
 
 		ServerUtil:WeldPart(char[weldPos], weapon)
+		ServerUtil:SetCollisionGroup(weapon, "Player")
 
 		weapon.Parent = char
 	end
+	_equipWeapon(styleFolder.WeaponEquipped:Clone(), "Right Arm")
+	if styleFolder:FindFirstChild("WeaponEquipped2") then _equipWeapon(styleFolder.WeaponEquipped2:Clone(), "Right Arm") end
+end
 
-	_equipWeapon()
-	if styleFolder:FindFirstChild("WeaponEquipped2") then _equipWeapon() end
+
+function ServerUtil:EquipArmor(char: Model, armorId: string)
+    if char.Humanoid.Health > 0 then
+        if char:FindFirstChild("Armor") then char.Armor:Destroy() end
+		for _, child: Instance in char:GetChildren() do
+			if child:HasTag("Weapon") then child:Destroy() end
+		end
+		if not armorId or armorId == "" or armorId == "None" then return end
+
+		local armor = ReplicatedStorage.Package.Cosmetics[armorId]:Clone() :: Model
+        local equipList = { "Head", "Torso", "Right Arm", "Left Arm", "Right Leg", "Left Leg" }
+
+        --- wait character fully loads
+        for _, part: string in equipList do char:WaitForChild(part, 999) end
+
+		--- equip armor
+		local function _equipArmorPart(part: string)
+			for _, child: BasePart in armor[part]:GetChildren() do
+                if child.Name ~= "Middle" then
+                    local weldC = Instance.new("WeldConstraint")
+                    weldC.Part0 = child.Parent.Middle
+                    weldC.Part1 = child
+                    weldC.Parent = armor
+                end
+            end
+
+            local weld = Instance.new("Weld")
+            weld.Part0 = char:FindFirstChild(if part == "Extra" then "Torso" else part)
+            weld.Part1 = armor[part].Middle
+            weld.Parent = armor
+		end
+        for _, part: string in equipList do
+			if not armor:FindFirstChild(part) then continue end
+
+            _equipArmorPart(part)
+        end
+
+		--- equip weapon
+		local function _weldWeapon(weapon: string, part: string)
+			if not armor:FindFirstChild(weapon) then return end
+
+			local realWeapon = armor[weapon]:Clone() :: Model
+			ServerUtil:WeldPart(char[part.." Arm"], realWeapon)
+
+			realWeapon:AddTag("Weapon")
+			realWeapon.Parent = char
+		end
+		_weldWeapon("HandleLeft", "Left")
+		_weldWeapon("HandleRight", "Right")
+
+		-- equip extra
+		if armor:FindFirstChild("Extra") then _equipArmorPart("Extra") end
+
+		--- ray cancels
+		ServerUtil:SetCollisionGroup(armor, "Player")
+
+		armor.Name = "Armor"
+        armor.Parent = char
+    end
 end
 
 function ServerUtil:SetCollisionGroup(object: Instance, group: string)

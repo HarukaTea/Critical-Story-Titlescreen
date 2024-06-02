@@ -42,7 +42,7 @@ local function setup(plr: Player)
 			Promise.new(function(resolve)
 				if profile.Data["Slot"..i].Stats.V9Transfered then resolve(profile.Data["Slot"..i]) return end
 
-				local info = { Stats = {}, Inventory = {}, QuestsV2 = { Main = 1, Town = {} } }
+				local info = { Stats = {}, Inventory = {}, QuestsV3 = { Main = 1, Side = {}, Town = {} } }
 
 				local data: table
 				if i == 1 then data = ds:GetAsync(plr.UserId) or TEMPLATE["Slot1"] end
@@ -124,6 +124,7 @@ local function setup(plr: Player)
 
 				info.Stats.LastSeenLocation = "MonolithVillage"
 				info.Stats.LastSeenWorld = "Mainworld"
+				info.Stats.Cosmetic = "None"
 				info.Stats.V9Transfered = true
 
 				profile.Data["Slot"..i] = info
@@ -135,7 +136,7 @@ local function setup(plr: Player)
 					plr:SetAttribute("DATA"..i..""..attr, HarukaLib:Deserialize(val))
 				end
 
-				plr:SetAttribute("DATA"..i.."StoryId", info.QuestsV2.Main)
+				plr:SetAttribute("DATA"..i.."StoryId", info.QuestsV3.Main)
 
 				--// Done
 				plr:SetAttribute("PlayerDataLoaded"..i, true)

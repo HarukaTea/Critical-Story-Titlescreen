@@ -9,14 +9,16 @@ return {
 			Class = "Warrior",
 			LastSeenLocation = "MonolithVillage",
 			LastSeenWorld = "Mainworld",
+			Cosmetic = "None",
 
 			V9Transfered = false
 		},
 
 		Inventory = {},
 
-		QuestsV2 = {
+		QuestsV3 = {
 			Main = 1,
+			Side = {},
 			Town = {}
 		}
 	},
@@ -28,14 +30,16 @@ return {
 			Class = "Warrior",
 			LastSeenLocation = "MonolithVillage",
 			LastSeenWorld = "Mainworld",
+			Cosmetic = "None",
 
 			V9Transfered = false
 		},
 
 		Inventory = {},
 
-		QuestsV2 = {
+		QuestsV3 = {
 			Main = 1,
+			Side = {},
 			Town = {}
 		}
 	},
@@ -47,14 +51,16 @@ return {
 			Class = "Warrior",
 			LastSeenLocation = "MonolithVillage",
 			LastSeenWorld = "Mainworld",
+			Cosmetic = "None",
 
 			V9Transfered = false
 		},
 
 		Inventory = {},
 
-		QuestsV2 = {
+		QuestsV3 = {
 			Main = 1,
+			Side = {},
 			Town = {}
 		}
 	}

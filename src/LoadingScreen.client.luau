@@ -6,6 +6,7 @@ local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 
 local plr = Players.LocalPlayer
 
@@ -13,7 +14,7 @@ local loadFinished = false
 
 ReplicatedFirst:RemoveDefaultLoadingScreen()
 StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
-
+UserInputService.ModalEnabled = true
 
 ---// create a default blackscreen before fusion loads
 local ui = Instance.new("ScreenGui")
@@ -92,7 +93,8 @@ local classes = {
     "rbxassetid://12190535870",
     "rbxassetid://12236618949",
     "rbxassetid://15875390788",
-    "rbxassetid://16654290906"
+    "rbxassetid://16654290906",
+    "rbxassetid://17667241921"
 }
 local classImages = {}
 for index, class in classes do
