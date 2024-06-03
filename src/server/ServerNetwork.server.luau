@@ -1,6 +1,5 @@
 --!nocheck
 
-local GroupService = game:GetService("GroupService")
 local MessagingService = game:GetService("MessagingService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
@@ -15,11 +14,7 @@ local CODE = { "MILKSHAKE", "CE", "PAHO" }
 local WORLDS = AssetBook.WorldInfo
 
 local function _teleportPrivateTests(id: string, rankNeeded: number, plr: Player, tpOptions: TeleportOptions)
-	local groups, rank = GroupService:GetGroupsAsync(plr.UserId), 0
-
-	for _, group: table in groups do
-		if group.Id == 16912246 then rank = group.Rank end
-	end
+	local rank = plr:GetRankInGroup(16912246)
 
 	if rank >= rankNeeded then
 		TeleportService:TeleportAsync(WORLDS[id], { plr }, tpOptions)
@@ -107,6 +102,9 @@ local function teleportHandler(plr: Player, option: string, privateCode: string,
 		end)
 
 		connection = MessagingService:SubscribeAsync("JoinFriendReturn", function(message: table)
+			local placeId = message.Data[3] :: number
+			if placeId ~= AssetBook.WorldInfo.Mainworld then return end
+
 			if message.Data[1] == visitorId then
 				teleportOptions.ServerInstanceId = message.Data[2]
 

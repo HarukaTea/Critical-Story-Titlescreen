@@ -84,7 +84,8 @@ local function FriendSlot(info: table, self: table, scope: table) : Frame
                 Size = fromScale(0.15, 0.4),
                 AnchorPoint = v2New(0, 0.5),
                 Text = "JOIN",
-                Visible = if string.find(info.LastLocation, "Critical Story") then true else false,
+
+                Visible = if info.PlaceId == AssetBook.WorldInfo.Mainworld then true else false,
 
                 [Fusion.OnEvent("MouseButton1Click")] = function()
                     self.isTeleporting:set(true)
