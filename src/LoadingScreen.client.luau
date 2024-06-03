@@ -2,19 +2,15 @@
 
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
-local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
 local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
 
 local plr = Players.LocalPlayer
 
 local loadFinished = false
 
-ReplicatedFirst:RemoveDefaultLoadingScreen()
 StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
-UserInputService.ModalEnabled = true
 
 ---// create a default blackscreen before fusion loads
 local ui = Instance.new("ScreenGui")

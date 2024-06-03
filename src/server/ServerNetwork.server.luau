@@ -6,17 +6,13 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local TeleportService = game:GetService("TeleportService")
 
+local AssetBook = require(ReplicatedStorage.Modules.Data.AssetBook)
 local Events = require(ServerScriptService.Modules.Data.ServerEvents)
 local Promise = require(ReplicatedStorage.Modules.Packages.Promise)
 local Spawn = require(ReplicatedStorage.Modules.Packages.Spawn)
 
 local CODE = { "MILKSHAKE", "CE", "PAHO" }
-local WORLDS = {
-	Mainworld = 12343565896, PrivateTest = 12003361010, NiximCavern = 12294239008,
-	CE = 17302653565, TimeDomain = 11904003271, Everfrost = 12373196969,
-	Stronghold = 12373229403, Arkus = 13970315225, LoneTown = 16555333700,
-	SummerIsland = 17444533020
-}
+local WORLDS = AssetBook.WorldInfo
 
 local function _teleportPrivateTests(id: string, rankNeeded: number, plr: Player, tpOptions: TeleportOptions)
 	local groups, rank = GroupService:GetGroupsAsync(plr.UserId), 0

@@ -2,6 +2,7 @@
 
 local RepS = game:GetService("ReplicatedStorage")
 local RS = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
 local AssetBook = require(RepS.Modules.Data.AssetBook)
 local Components = require(RepS.Modules.UI.Vanilla)
@@ -128,6 +129,8 @@ return function(plr: Player)
 	self.char.Humanoid.Died:Once(_onDead)
 
 	--// Setups
+	UserInputService.ModalEnabled = true
+
 	wait(0.5)
 	self.bottomFramePos:set(fromScale(0.5, 1))
 	for i = 1, 3 do

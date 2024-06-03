@@ -10,13 +10,13 @@ local char = script.Parent :: Model
 local plr = Players:GetPlayerFromCharacter(char)
 
 local function setup()
-    repeat task.wait() until plr:GetAttribute("PlayerDataLoaded1")
-    repeat task.wait()  until plr:GetAttribute("PlayerDataLoaded2")
-    repeat task.wait()  until plr:GetAttribute("PlayerDataLoaded3")
-
     char.Archivable = true
 
     ServerUtil:SetCollisionGroup(char, "Player")
+
+    repeat task.wait() until plr:GetAttribute("PlayerDataLoaded1")
+    repeat task.wait()  until plr:GetAttribute("PlayerDataLoaded2")
+    repeat task.wait()  until plr:GetAttribute("PlayerDataLoaded3")
 
     local container = Instance.new("Folder")
     container.Name = plr.Name
@@ -33,7 +33,7 @@ local function setup()
         ServerUtil:SetCollisionGroup(clonedChar, "ClonedCharacter")
 
         local cosmetic = plr:GetAttribute("DATA"..i.."Cosmetic") :: string
-        if cosmetic == "None" or cosmetic == "" then
+        if cosmetic == "None" then
             ServerUtil:EquipWeapon(clonedChar, plr:GetAttribute("DATA"..i.."Class"))
         else
             ServerUtil:EquipArmor(clonedChar, cosmetic)

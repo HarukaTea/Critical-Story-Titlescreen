@@ -27,12 +27,3 @@ local function skyballSetup()
     end)
 end
 skyballSetup()
-
-
-local function clearDebris()
-    repeat task.wait() until plr.PlayerGui:FindFirstChild("Freecam")
-
-    task.wait()
-    plr.PlayerGui.Freecam:Destroy()
-end
-clearDebris()
