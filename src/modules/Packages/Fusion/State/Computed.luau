@@ -36,11 +36,11 @@ local CLASS_METATABLE = {__index = class}
 	Returns true if it changed, or false if it's identical.
 ]]
 function class:update(): boolean
-	local self = self :: InternalTypes.Computed<any, any>
+	local self = self :: InternalTypes.Computed<unknown, unknown>
 	if self.scope == nil then
 		return false
 	end
-	local outerScope = self.scope :: Types.Scope<any>
+	local outerScope = self.scope :: Types.Scope<unknown>
 
 	-- remove this object from its dependencies' dependent sets
 	for dependency in pairs(self.dependencySet) do
@@ -62,7 +62,7 @@ function class:update(): boolean
 				External.logError("useAfterDestroy", nil, `The {target.kind} object`, "the Computed that is use()-ing it")
 			elseif whichLivesLonger(outerScope, self.oldestTask, target.scope, target.oldestTask) == "definitely-a" then
 				External.logWarn("possiblyOutlives", `The {target.kind} object`, "the Computed that is use()-ing it")
-			end
+			end		
 			self.dependencySet[target] = true
 			return (target :: InternalTypes.StateObject<T>):_peek()
 		else
@@ -115,8 +115,8 @@ end
 --[[
 	Returns the interior value of this state object.
 ]]
-function class:_peek(): any
-	local self = self :: InternalTypes.Computed<any, any>
+function class:_peek(): unknown
+	local self = self :: InternalTypes.Computed<unknown, unknown>
 	return self._value
 end
 
@@ -127,7 +127,7 @@ end
 local function Computed<T, S>(
 	scope: Types.Scope<S>,
 	processor: (Types.Use, Types.Scope<S>) -> T,
-	destructor: any?
+	destructor: unknown?
 ): Types.Computed<T>
 	if typeof(scope) == "function" then
 		External.logError("scopeMissing", nil, "Computeds", "myScope:Computed(function(use, scope) ... end)")
@@ -159,7 +159,7 @@ local function Computed<T, S>(
 	table.insert(scope, destroy)
 
 	self:update()
-
+	
 	return self
 end
 

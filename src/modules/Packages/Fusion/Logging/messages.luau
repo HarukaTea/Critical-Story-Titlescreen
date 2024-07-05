@@ -39,7 +39,7 @@ return {
 	springNanMotion = "A spring encountered NaN during motion, so has snapped to the goal position. Ensure no springs have NaN positions or velocities.",
 	springTypeMismatch = "The type '%s' doesn't match the spring's type '%s'.",
 	stateGetWasRemoved = "`StateObject:get()` has been replaced by `use()` and `peek()` - see discussion #217 on GitHub.",
-	anyMessage = "Unknown error: ERROR_MESSAGE",
+	unknownMessage = "Unknown error: ERROR_MESSAGE",
 	unrecognisedChildType = "'%s' type children aren't accepted by `[Children]`.",
 	unrecognisedPropertyKey = "'%s' keys aren't accepted in property tables.",
 	unrecognisedPropertyStage = "'%s' isn't a valid stage for a special key to be applied at.",

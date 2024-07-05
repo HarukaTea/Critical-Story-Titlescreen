@@ -3,7 +3,6 @@
 local RepS = game:GetService("ReplicatedStorage")
 
 local Fusion = require(RepS.Modules.Packages.Fusion)
-local HarukaLib = require(RepS.Modules.Packages.HarukaLib)
 
 local fromScale = UDim2.fromScale
 
@@ -14,12 +13,12 @@ local function TitleScreenPinia(self: table)
         return Fusion.Value(self.scope, val)
     end
 
-    self.Add, self.Empty = HarukaLib.Bin()
-
     self.bottomFramePos = Value(fromScale(0.5, 1.5))
 
-	self.playBtnText = Value("PLAY")
-	self.playBtnPos = Value(fromScale(0.5, -1))
+    self.currentUI = Value("Title")
+    self.clickTipVisible = Value(true)
+
+    self.backBtnVisible = Value(false)
 
     self.saveSlotBGPos = Value(fromScale(-0.5, -0.7))
     self.charSelfViews = { Value(), Value(), Value() }

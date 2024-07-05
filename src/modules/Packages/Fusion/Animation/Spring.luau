@@ -35,7 +35,7 @@ local CLASS_METATABLE = {__index = class}
 function class:setPosition(
 	newValue: Types.Animatable
 )
-	local self = self :: InternalTypes.Spring<any>
+	local self = self :: InternalTypes.Spring<unknown>
 	local newType = typeof(newValue)
 	if newType ~= self._currentType then
 		External.logError("springTypeMismatch", nil, newType, self._currentType)
@@ -57,7 +57,7 @@ end
 function class:setVelocity(
 	newValue: Types.Animatable
 )
-	local self = self :: InternalTypes.Spring<any>
+	local self = self :: InternalTypes.Spring<unknown>
 	local newType = typeof(newValue)
 	if newType ~= self._currentType then
 		External.logError("springTypeMismatch", nil, newType, self._currentType)
@@ -77,7 +77,7 @@ end
 function class:addVelocity(
 	deltaValue: Types.Animatable
 )
-	local self = self :: InternalTypes.Spring<any>
+	local self = self :: InternalTypes.Spring<unknown>
 	local deltaType = typeof(deltaValue)
 	if deltaType ~= self._currentType then
 		External.logError("springTypeMismatch", nil, deltaType, self._currentType)
@@ -95,7 +95,7 @@ end
 	changed.
 ]]
 function class:update(): boolean
-	local self = self :: InternalTypes.Spring<any>
+	local self = self :: InternalTypes.Spring<unknown>
 	local goalValue = peek(self._goal)
 
 	-- figure out if this was a goal change or a speed/damping change
@@ -166,8 +166,8 @@ end
 --[[
 	Returns the interior value of this state object.
 ]]
-function class:_peek(): any
-	local self = self :: InternalTypes.Spring<any>
+function class:_peek(): unknown
+	local self = self :: InternalTypes.Spring<unknown>
 	return self._currentValue
 end
 
@@ -176,7 +176,7 @@ function class:get()
 end
 
 local function Spring<T>(
-	scope: Types.Scope<any>,
+	scope: Types.Scope<unknown>,
 	goal: Types.UsedAs<T>,
 	speed: Types.UsedAs<number>?,
 	damping: Types.UsedAs<number>?
@@ -192,7 +192,7 @@ local function Spring<T>(
 		damping = 1
 	end
 
-	local dependencySet: {[Types.Dependency]: any} = {}
+	local dependencySet: {[Types.Dependency]: unknown} = {}
 	local goalIsState = isState(goal)
 	if goalIsState then
 		local goal = goal :: Types.StateObject<T>
@@ -241,7 +241,7 @@ local function Spring<T>(
 	end
 	self.oldestTask = destroy
 	table.insert(scope, destroy)
-
+	
 	if goalIsState then
 		local goal = goal :: Types.StateObject<T>
 		if goal.scope == nil then

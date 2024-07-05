@@ -8,6 +8,7 @@ local AssetBook = require(RepS.Modules.Data.AssetBook)
 local Components = require(RepS.Modules.UI.Vanilla)
 local Events = require(RepS.Modules.Data.Events)
 local Fusion = require(RepS.Modules.Packages.Fusion)
+local Spawn = require(RepS.Modules.Packages.Spawn)
 
 local Children, New, Tween, Computed = Fusion.Children, Fusion.New, Fusion.Tween, Fusion.Computed
 
@@ -52,7 +53,7 @@ return function(plr: Player)
 				Size = fromScale(1, 0.1),
 
 				Position = Tween(scope, Computed(scope, function(use)
-					return use(self.bottomFramePos)
+						return use(self.bottomFramePos)
 				end), AssetBook.TweenInfos.two),
 				Visible = Computed(scope, function(use)
 					return not use(self.isTeleporting)
@@ -61,8 +62,72 @@ return function(plr: Player)
 				[Children] = {
 					New(scope, "UIAspectRatioConstraint")({ AspectRatio = 25.129 }),
 
-					BtnsFrame(self)
-				}
+					BtnsFrame(self),
+
+					Components.TextLabel(scope, {
+						Name = "TipBG",
+						AnchorPoint = v2New(0.5, 0.5),
+						Position = fromScale(0.5, 0),
+						Size = fromScale(0.5, 0.5),
+						BackgroundTransparency = 0,
+
+						[Children] = {
+							New(scope, "UIGradient")({
+								Color = ColorSequence.new({
+									ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0)),
+									ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0)),
+								}),
+
+								Transparency = Tween(scope, Computed(scope, function(use)
+									return if use(self.clickTipVisible) then
+										NumberSequence.new({
+											NumberSequenceKeypoint.new(0, 1),
+											NumberSequenceKeypoint.new(0.5, 0),
+											NumberSequenceKeypoint.new(1, 1),
+										})
+									else NumberSequence.new(1, 1)
+								end), AssetBook.TweenInfos.twiceHalf),
+							}),
+
+							Components.TextLabel(scope, {
+								Name = "Tip",
+								FontFace = Font.new(
+									"rbxasset://fonts/families/GothamSSm.json",
+									Enum.FontWeight.Bold,
+									Enum.FontStyle.Normal
+								),
+								Text = "Click anywhere to continue...",
+								Size = fromScale(1, 1),
+
+								TextTransparency = Tween(scope, Computed(scope, function(use)
+									return if use(self.clickTipVisible) then 0 else 1
+								end), AssetBook.TweenInfos.twiceHalf),
+
+								[Children] = {
+									New(scope, "UIPadding")({
+										Name = "UIPadding",
+										PaddingBottom = UDim.new(0.15, 0),
+										PaddingTop = UDim.new(0.15, 0),
+									}),
+								},
+							}),
+						},
+					}),
+
+					Components.TextLabel(scope, {
+						Name = "MapCredits",
+						Position = fromScale(0, 0.4),
+						Size = fromScale(1, 0.3),
+						FontFace = Font.fromName("Ubuntu", Enum.FontWeight.Bold),
+						Text = "Map by MaxingPar - Ascension To Heaven",
+						TextXAlignment = Enum.TextXAlignment.Left,
+
+						[Children] = {
+							New(scope, "UIPadding")({ PaddingLeft = UDim.new(0.01, 0) }),
+							New(scope, "UITextSizeConstraint")({ MaxTextSize = 14 }),
+						},
+					}),
+				},
 			}),
 			Components.Frame(scope, {
 				Name = "Center",
@@ -86,8 +151,8 @@ return function(plr: Player)
 
 						[Children] = {
 							Components.TextUIStroke(scope, { Thickness = 3 }),
-							New(scope, "UITextSizeConstraint")({ MaxTextSize = 36 })
-						}
+							New(scope, "UITextSizeConstraint")({ MaxTextSize = 36 }),
+						},
 					}),
 					Components.Frame(scope, {
 						Name = "SaveSlotsFrame",
@@ -95,20 +160,24 @@ return function(plr: Player)
 						Visible = Computed(scope, function(use)
 							return not use(self.isTeleporting)
 						end),
-						Position = Tween(scope, Computed(scope, function(use)
-							return use(self.saveSlotBGPos)
-						end), AssetBook.TweenInfos.oneHalf),
+						Position = Tween(
+							scope,
+							Computed(scope, function(use)
+								return use(self.saveSlotBGPos)
+							end),
+							AssetBook.TweenInfos.oneHalf
+						),
 
 						[Children] = {
 							SaveSlot(1, self),
 							SaveSlot(2, self),
-							SaveSlot(3, self)
-						}
+							SaveSlot(3, self),
+						},
 					}),
 
-					FriendListFrame(self)
-				}
-			})
+					FriendListFrame(self),
+				},
+			}),
 		},
 	})
 
@@ -120,8 +189,6 @@ return function(plr: Player)
 
 	--// Clear
 	local function _onDead()
-		self.Empty()
-
 		Events.TeleportFailed:DisconnectAll()
 
 		Fusion.doCleanup(self.scope)
@@ -133,22 +200,45 @@ return function(plr: Player)
 
 	wait(0.5)
 	self.bottomFramePos:set(fromScale(0.5, 1))
-	for i = 1, 3 do
-		local charSelfViewSlot = Fusion.peek(self.charSelfViews[i]) :: ViewportFrame
-		charSelfViewSlot.CurrentCamera = charSelfViewSlot:FindFirstChildOfClass("Camera")
 
-		workspace.MapComponents.PlayerChars:WaitForChild(self.plr.Name, 999):WaitForChild("Slot"..i, 999)
+	Spawn(function()
+		for i = 1, 3 do
+			local charSelfViewSlot = Fusion.peek(self.charSelfViews[i]) :: ViewportFrame
+			charSelfViewSlot.CurrentCamera = charSelfViewSlot:FindFirstChildOfClass("Camera")
 
-		self.Add(RS.Heartbeat:Connect(function()
-			if charSelfViewSlot:FindFirstChildOfClass("Model") then charSelfViewSlot:FindFirstChildOfClass("Model"):Destroy() end
+			workspace.MapComponents.PlayerChars:WaitForChild(self.plr.Name, 999):WaitForChild("Slot" .. i, 999)
 
-			local clonedChar = workspace.MapComponents.PlayerChars[self.plr.Name]["Slot"..i]:Clone() :: Model
-			local hrp = clonedChar.PrimaryPart
-			if not hrp then return end
+			table.insert(scope, RS.Heartbeat:Connect(function()
+				if charSelfViewSlot:FindFirstChildOfClass("Model") then charSelfViewSlot:FindFirstChildOfClass("Model"):Destroy() end
+				if not workspace.MapComponents.PlayerChars:FindFirstChild(self.plr.Name) then return end
+				if not workspace.MapComponents.PlayerChars[self.plr.Name]:FindFirstChild("Slot" .. i) then return end
 
-			charSelfViewSlot.CurrentCamera.CFrame = cfNew(hrp.Position + (hrp.CFrame.LookVector * 5), hrp.Position)
+				local clonedChar = workspace.MapComponents.PlayerChars[self.plr.Name]["Slot" .. i]:Clone() :: Model
+				local hrp = clonedChar.PrimaryPart
+				if not hrp then return end
 
-			clonedChar.Parent = charSelfViewSlot
-		end))
-	end
+				charSelfViewSlot.CurrentCamera.CFrame = cfNew(hrp.Position + (hrp.CFrame.LookVector * 5), hrp.Position)
+
+				clonedChar.Parent = charSelfViewSlot
+			end))
+		end
+	end)
+
+	wait(2)
+	local check = false
+	local clickDetect = UserInputService.InputBegan:Connect(function(input, gpe)
+		if gpe then return end
+
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then check = true end
+	end)
+	repeat RS.RenderStepped:Wait() until check
+
+	if clickDetect then clickDetect:Disconnect() end
+
+	workspace.Sounds.SFXs.Click:Play()
+
+	self.backBtnVisible:set(true)
+	self.saveSlotBGPos:set(fromScale(0.5, -0.7))
+	self.currentUI:set("SaveSlot")
+	self.clickTipVisible:set(false)
 end

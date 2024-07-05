@@ -27,24 +27,24 @@ local function Out(
 			stage = "observer",
 			apply = function(
 				self: Types.SpecialKey,
-				scope: Types.Scope<any>,
-				value: any,
+				scope: Types.Scope<unknown>,
+				value: unknown,
 				applyTo: Instance
 			)
 				local ok, event = pcall(applyTo.GetPropertyChangedSignal, applyTo, propertyName)
 				if not ok then
 					External.logError("invalidOutProperty", nil, applyTo.ClassName, propertyName)
 				end
-
+	
 				if not isState(value) then
 					External.logError("invalidOutType")
 				end
-				local value = value :: Types.StateObject<any>
+				local value = value :: Types.StateObject<unknown>
 				if value.kind ~= "Value" then
 					External.logError("invalidOutType")
 				end
-				local value = value :: Types.Value<any, any>
-
+				local value = value :: Types.Value<unknown>
+	
 				if value.scope == nil then
 					External.logError("useAfterDestroy", nil, `The Value, which [Out "{propertyName}"] outputs to,`, `the {applyTo.ClassName} instance`)
 				elseif whichLivesLonger(scope, applyTo, value.scope, value.oldestTask) == "definitely-a" then

@@ -27,28 +27,28 @@ local function AttributeOut(
 			stage = "observer",
 			apply = function(
 				self: Types.SpecialKey,
-				scope: Types.Scope<any>,
-				value: any,
+				scope: Types.Scope<unknown>,
+				value: unknown,
 				applyTo: Instance
 			)
 				local event = applyTo:GetAttributeChangedSignal(attributeName)
-
+	
 				if not isState(value) then
 					External.logError("invalidAttributeOutType")
 				end
-				local value = value :: Types.StateObject<any>
+				local value = value :: Types.StateObject<unknown>
 				if value.kind ~= "Value" then
 					External.logError("invalidAttributeOutType")
 				end
-				local value = value :: Types.Value<any, any>
-
+				local value = value :: Types.Value<unknown>
+				
 				if value.scope == nil then
 					External.logError("useAfterDestroy", nil, `The Value object, which [AttributeOut "{attributeName}"] outputs to,`, `the {applyTo.ClassName} instance`)
 				elseif whichLivesLonger(scope, applyTo, value.scope, value.oldestTask) == "definitely-a" then
 					External.logWarn("possiblyOutlives", `The Value object, which [AttributeOut "{attributeName}"] outputs to,`, `the {applyTo.ClassName} instance`)
 				end
 				value:set((applyTo :: any):GetAttribute(attributeName))
-				table.insert(scope, event:Connect(function()
+				table.insert(scope, event:Connect(function()	
 					value:set((applyTo :: any):GetAttribute(attributeName))
 				end))
 			end

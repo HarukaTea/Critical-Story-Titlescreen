@@ -24,8 +24,8 @@ local WEAK_KEYS_METATABLE = {__mode = "k"}
 --[[
 	Returns the current value of this contextual.
 ]]
-function class:now(): any
-	local self = self :: InternalTypes.Contextual<any>
+function class:now(): unknown
+	local self = self :: InternalTypes.Contextual<unknown>
 	local thread = coroutine.running()
 	local value = self._valuesNow[thread]
 	if typeof(value) ~= "table" then
@@ -39,13 +39,13 @@ end
 	Temporarily assigns a value to this contextual.
 ]]
 function class:is(
-	newValue: any
+	newValue: unknown
 )
 	-- Methods use colon `:` syntax for consistency and autocomplete but we
 	-- actually want them to operate on the `self` from this outer lexical scope
-	local outerSelf = self :: InternalTypes.Contextual<any>
+	local outerSelf = self :: InternalTypes.Contextual<unknown>
 	local methods = {}
-
+	
 	function methods:during<T, A...>(
 		callback: (A...) -> T,
 		...: A...

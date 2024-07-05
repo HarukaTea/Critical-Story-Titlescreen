@@ -28,7 +28,7 @@ local function setup()
 
         clonedChar:PivotTo(workspace.MapComponents.SaveSlotLocators["Locator"..i].CFrame)
         clonedChar.Name = "Slot"..i
-        clonedChar.PrimaryPart = clonedChar:WaitForChild("Humanoid").RootPart
+        clonedChar.PrimaryPart = clonedChar:WaitForChild("Humanoid", 999).RootPart
 
         ServerUtil:SetCollisionGroup(clonedChar, "ClonedCharacter")
 
@@ -41,7 +41,7 @@ local function setup()
 
         clonedChar.Parent = container
 
-        clonedChar:WaitForChild("Humanoid"):LoadAnimation(ReplicatedStorage.Package.Idle):Play()
+        clonedChar:WaitForChild("Humanoid", 999):LoadAnimation(ReplicatedStorage.Package.Animations.NPCIdle):Play()
     end
 end
 setup()

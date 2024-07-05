@@ -28,7 +28,7 @@ local CLASS_METATABLE = {__index = class}
 	Returns false as the current value doesn't change right away.
 ]]
 function class:update(): boolean
-	local self = self :: InternalTypes.Tween<any>
+	local self = self :: InternalTypes.Tween<unknown>
 	local goalValue = peek(self._goal)
 
 	-- if the goal hasn't changed, then this is a TweenInfo change.
@@ -67,8 +67,8 @@ end
 --[[
 	Returns the interior value of this state object.
 ]]
-function class:_peek(): any
-	local self = self :: InternalTypes.Tween<any>
+function class:_peek(): unknown
+	local self = self :: InternalTypes.Tween<unknown>
 	return self._currentValue
 end
 
@@ -77,7 +77,7 @@ function class:get()
 end
 
 local function Tween<T>(
-	scope: Types.Scope<any>,
+	scope: Types.Scope<unknown>,
 	goal: Types.UsedAs<T>,
 	tweenInfo: Types.UsedAs<TweenInfo>?
 ): Types.Tween<T>
@@ -91,7 +91,7 @@ local function Tween<T>(
 		tweenInfo = TweenInfo.new()
 	end
 
-	local dependencySet: {[Types.Dependency]: any} = {}
+	local dependencySet: {[Types.Dependency]: unknown} = {}
 
 	local goalIsState = isState(goal)
 	if goalIsState then
@@ -141,7 +141,7 @@ local function Tween<T>(
 	end
 	self.oldestTask = destroy
 	table.insert(scope, destroy)
-
+	
 	if goalIsState then
 		local goal = goal :: any
 		if goal.scope == nil then

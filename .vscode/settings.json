@@ -1,20 +1,22 @@
 {
-  "robloxLsp.workspace.ignoreDir": [
-    ".vscode",
-    "**/_Index/**",
+    "robloxLsp.workspace.ignoreDir": [
+        ".vscode",
+        "**/_Index/**",
 
-    "src/modules/Packages/Warp/Util/Buffer.luau"
-  ],
+        "src/modules/Packages/Warp/Util/Buffer.luau"
+    ],
+    "robloxLsp.diagnostics.disable": ["undefined-type", "redefined-type"],
+    "roblox-ui.sourcemap.rojoProjectFile": "titlescreen.project.json",
 
-  "files.exclude": {
-    "**/.git": true,
-    "**/.svn": true,
-    "**/.hg": true,
-    "**/CVS": true,
-    "**/.DS_Store": true,
-    "**/Thumbs.db": true,
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
 
-    "src/modules/Packages": true,
-    "src/server/Modules/Packages": true
-  }
+        "src/character/Health.server.luau": true,
+        "src/client/RbxCharacterSounds.client.luau": true
+    }
 }

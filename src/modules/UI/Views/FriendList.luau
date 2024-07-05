@@ -158,6 +158,19 @@ local function FriendList(self: table) : Frame
                     FriendListFuncButton("JoinPublic", self)
                 }
             }),
+
+            Components.TextLabel(scope, {
+                Name = "LoadingTip",
+                AnchorPoint = v2New(0.5, 0.5),
+                Position = fromScale(0.5, 0.5),
+                Size = fromScale(1, 0.1),
+                Text = "LOADING...",
+                TextTransparency = 0.4,
+
+                Visible = Computed(scope, function(use)
+                    return if #use(self.friends) > 0 then false else true
+                end)
+            })
         }
     })
 end

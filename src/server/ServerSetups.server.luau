@@ -1,6 +1,7 @@
 --!nocheck
 
 local PhysicsService = game:GetService("PhysicsService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 
 local function collisionRegister()
@@ -12,3 +13,9 @@ local function collisionRegister()
 	PhysicsService:CollisionGroupSetCollidable("ClonedCharacter", "ClonedCharacter", false)
 end
 collisionRegister()
+
+
+local function soundRegister()
+	ReplicatedStorage.Package.Sounds.Parent = workspace
+end
+soundRegister()

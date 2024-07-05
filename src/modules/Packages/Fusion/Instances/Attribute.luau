@@ -29,12 +29,12 @@ local function Attribute(
 			stage = "self",
 			apply = function(
 				self: Types.SpecialKey,
-				scope: Types.Scope<any>,
-				value: any,
+				scope: Types.Scope<unknown>,
+				value: unknown,
 				applyTo: Instance
 			)
 				if isState(value) then
-					local value = value :: Types.StateObject<any>
+					local value = value :: Types.StateObject<unknown>
 					if value.scope == nil then
 						External.logError("useAfterDestroy", nil, `The {value.kind} object, bound to [Attribute "{attributeName}"],`, `the {applyTo.ClassName} instance`)
 					elseif whichLivesLonger(scope, applyTo, value.scope, value.oldestTask) == "definitely-a" then

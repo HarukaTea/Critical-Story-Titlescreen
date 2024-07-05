@@ -40,16 +40,16 @@ local function doCleanup(
 		task()
 
 	elseif typeof(task) == "table" then
-		local task = (task :: any) :: {Destroy: (...any) -> (...any)?, destroy: (...any) -> (...any)?}
+		local task = (task :: any) :: {Destroy: (...unknown) -> (...unknown)?, destroy: (...unknown) -> (...unknown)?}
 
 		-- case 4: destroy() function
 		if typeof(task.destroy) == "function" then
-			local task = (task :: any) :: {destroy: (...any) -> (...any)}
+			local task = (task :: any) :: {destroy: (...unknown) -> (...unknown)}
 			task:destroy()
 
 		-- case 5: Destroy() function
 		elseif typeof(task.Destroy) == "function" then
-			local task = (task :: any) :: {Destroy: (...any) -> (...any)}
+			local task = (task :: any) :: {Destroy: (...unknown) -> (...unknown)}
 			task:Destroy()
 
 		-- case 6: array of tasks
@@ -63,7 +63,7 @@ local function doCleanup(
 			end
 		end
 	end
-
+	
 	alreadyDestroying[task] = nil
 end
 

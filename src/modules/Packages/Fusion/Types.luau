@@ -41,8 +41,8 @@ export type Task =
 	Instance |
 	RBXScriptConnection |
 	() -> () |
-	{destroy: (any) -> ()} |
-	{Destroy: (any) -> ()} |
+	{destroy: (unknown) -> ()} |
+	{Destroy: (unknown) -> ()} |
 	{Task}
 
 -- A scope of tasks to clean up.
@@ -50,8 +50,8 @@ export type Scope<Constructors> = {Task} & Constructors
 
 -- An object which uses a scope to dictate how long it lives.
 export type ScopedObject = {
-	scope: Scope<any>?,
-	oldestTask: any
+	scope: Scope<unknown>?,
+	oldestTask: unknown
 }
 
 -- Script-readable version information.
@@ -74,20 +74,20 @@ type ContextualIsMethods = {
 
 -- A graph object which can have dependents.
 export type Dependency = ScopedObject & {
-	dependentSet: {[Dependent]: any}
+	dependentSet: {[Dependent]: unknown}
 }
 
 -- A graph object which can have dependencies.
 export type Dependent = ScopedObject & {
 	update: (Dependent) -> boolean,
-	dependencySet: {[Dependency]: any}
+	dependencySet: {[Dependency]: unknown}
 }
 
 -- An object which stores a piece of reactive state.
 export type StateObject<T> = Dependency & {
 	type: "State",
 	kind: string,
-	____phantom_peekType: (any) -> T -- phantom data so this contains a T
+	____phantom_peekType: (never) -> T -- phantom data so this contains a T
 }
 
 -- Passing values of this type to `Use` returns `T`.
@@ -100,15 +100,15 @@ export type Use = <T>(target: UsedAs<T>) -> T
 export type Value<T, S = T> = StateObject<T> & {
 	kind: "State",
  	set: (Value<T, S>, newValue: S, force: boolean?) -> (),
-	 ____phantom_setType: (any) -> S -- phantom data so this contains a T
+	 ____phantom_setType: (never) -> S -- phantom data so this contains a T
 }
 export type ValueConstructor = <T>(
-	scope: Scope<any>,
+	scope: Scope<unknown>,
 	initialValue: T
 ) -> Value<T, any>
 
 -- A state object whose value is derived from other objects using a callback.
-export type Computed<T> = Dependent & {
+export type Computed<T> = StateObject<T> & Dependent & {
 	kind: "Computed"
 }
 export type ComputedConstructor = <T, S>(
@@ -117,7 +117,7 @@ export type ComputedConstructor = <T, S>(
 ) -> Computed<T>
 
 -- A state object which maps over keys and/or values in another table.
-export type For<KO, VO> = Dependent & {
+export type For<KO, VO> = StateObject<{[KO]: VO}> & Dependent & {
 	kind: "For"
 }
 export type ForPairsConstructor =  <KI, KO, VI, VO, S>(
@@ -143,29 +143,29 @@ export type Observer = Dependent & {
 	onBind: (Observer, callback: () -> ()) -> (() -> ())
 }
 export type ObserverConstructor = (
-	scope: Scope<any>,
-	watching: any
+	scope: Scope<unknown>,
+	watching: unknown
 ) -> Observer
 
 -- A state object which follows another state object using tweens.
-export type Tween<T> = Dependent & {
+export type Tween<T> = StateObject<T> & Dependent & {
 	kind: "Tween"
 }
 export type TweenConstructor = <T>(
-	scope: Scope<any>,
+	scope: Scope<unknown>,
 	goalState: UsedAs<T>,
 	tweenInfo: UsedAs<TweenInfo>?
 ) -> Tween<T>
 
 -- A state object which follows another state object using spring simulation.
-export type Spring<T> = Dependent & {
+export type Spring<T> = StateObject<T> & Dependent & {
 	kind: "Spring",
 	setPosition: (Spring<T>, newPosition: T) -> (),
 	setVelocity: (Spring<T>, newVelocity: T) -> (),
 	addVelocity: (Spring<T>, deltaVelocity: T) -> ()
 }
 export type SpringConstructor = <T>(
-	scope: Scope<any>,
+	scope: Scope<unknown>,
 	goalState: UsedAs<T>,
 	speed: UsedAs<number>?,
 	damping: UsedAs<number>?
@@ -178,25 +178,25 @@ export type SpecialKey = {
 	stage: "self" | "descendants" | "ancestor" | "observer",
 	apply: (
 		self: SpecialKey,
-		scope: Scope<any>,
-		value: any,
+		scope: Scope<unknown>,
+		value: unknown,
 		applyTo: Instance
 	) -> ()
 }
 
 -- A collection of instances that may be parented to another instance.
-export type Child = Instance | StateObject<Child> | {[any]: Child}
+export type Child = Instance | StateObject<Child> | {[unknown]: Child}
 
 -- A table that defines an instance's properties, handlers and children.
-export type PropertyTable = {[string | SpecialKey]: any}
+export type PropertyTable = {[string | SpecialKey]: unknown}
 
 export type NewConstructor = (
-	scope: Scope<any>,
+	scope: Scope<unknown>,
 	className: string
 ) -> (propertyTable: PropertyTable) -> Instance
 
 export type HydrateConstructor = (
-	scope: Scope<any>,
+	scope: Scope<unknown>,
 	target: Instance
 ) -> (propertyTable: PropertyTable) -> Instance
 
@@ -239,8 +239,8 @@ export type Fusion = {
 
 	doCleanup: (Task) -> (),
 	scoped: ScopedConstructor,
-	deriveScope: <T>(existing: Scope<T>) -> Scope<T>,
-	innerScope: <T>(existing: Scope<T>) -> Scope<T>,
+	deriveScope: DeriveScopeConstructor,
+	innerScope: DeriveScopeConstructor,
 
 	peek: Use,
 	Value: ValueConstructor,
@@ -257,6 +257,7 @@ export type Fusion = {
 	Hydrate: HydrateConstructor,
 
 	Ref: SpecialKey,
+	Child: ({Child}) -> Child,
 	Children: SpecialKey,
 	Out: (propertyName: string) -> SpecialKey,
 	OnEvent: (eventName: string) -> SpecialKey,
@@ -270,14 +271,14 @@ export type ExternalProvider = {
 	policies: {
 		allowWebLinks: boolean
 	},
-
+	
 	logErrorNonFatal: (
 		errorString: string
 	) -> (),
 	logWarn: (
 		errorString: string
 	) -> (),
-
+	
 	doTaskImmediate: (
 		resume: () -> ()
 	) -> (),

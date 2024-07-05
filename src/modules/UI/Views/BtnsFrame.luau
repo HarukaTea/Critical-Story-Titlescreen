@@ -1,6 +1,8 @@
 --!nocheck
 
 local RepS = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
 local AssetBook = require(RepS.Modules.Data.AssetBook)
 local Components = require(RepS.Modules.UI.Vanilla)
@@ -15,32 +17,33 @@ local udNew = UDim.new
 local function BtnsFrame(self: table) : Frame
     local scope = self.scope :: table
 
+    local backBtnHovering = Fusion.Value(scope, false)
+
     return Components.Frame(scope, {
         Name = "BtnsFrame",
 
         [Fusion.Children] = {
             Components.TextButton(scope, {
-                Name = "PlayButton",
+                Name = "BackBtn",
                 AnchorPoint = v2New(0.5, 0),
                 Size = fromScale(0.13, 0.6),
+                Text = "BACK",
+                Position = fromScale(0.5, -0.5),
 
-                Position = Fusion.Tween(scope, Fusion.Computed(scope, function(use)
-                    return use(self.playBtnPos)
-                end), AssetBook.TweenInfos.one),
-                Text = Fusion.Computed(scope, function(use)
-                    return use(self.playBtnText)
+                Visible = Fusion.Computed(scope, function(use)
+                    return use(self.backBtnVisible)
                 end),
 
+                [Fusion.OnEvent("MouseEnter")] = function()
+                    backBtnHovering:set(true)
+                end,
+                [Fusion.OnEvent("MouseLeave")] = function()
+                    backBtnHovering:set(false)
+                end,
                 [Fusion.OnEvent("MouseButton1Click")] = function()
                     workspace.Sounds.SFXs.Click:Play()
 
-                    if peek(self.playBtnText) == "PLAY" then
-                        self.playBtnPos:set(fromScale(0.5, -0.5))
-                        self.playBtnText:set("BACK")
-
-                        self.saveSlotBGPos:set(fromScale(0.5, -0.7))
-
-                    elseif peek(self.playBtnText) == "BACK" and peek(self.isChoosingSaveSlot) then
+                    if peek(self.currentUI) == "SaveSlot" and peek(self.isChoosingSaveSlot) then
                         for _, element: any in self.saveSlotVisible do element:set(true) end
                         for _, element: any in self.saveSlotEraseVisible do element:set(false) end
 
@@ -51,13 +54,31 @@ local function BtnsFrame(self: table) : Frame
                         self.isChoosingSaveSlot:set(false)
                         self.friendFramePos:set(fromScale(1.5, -0.7))
 
+                        self.currentUI:set("SaveSlot")
+
                     else
                         self.saveSlotBGPos:set(fromScale(-0.5, -0.7))
+                        self.clickTipVisible:set(true)
+                        self.backBtnVisible:set(false)
+                        self.currentUI:set("Title")
 
-                        self.playBtnText:set("PLAY")
-                        self.playBtnPos:set(fromScale(0.5, -1))
+                        local check = false
+                        local clickDetect = UserInputService.InputBegan:Connect(function(input, gpe)
+                            if gpe then return end
+
+                            if input.UserInputType == Enum.UserInputType.MouseButton1 then check = true end
+                        end)
+                        repeat RunService.RenderStepped:Wait() until check
+
+                        if clickDetect then clickDetect:Disconnect() end
+
+                        workspace.Sounds.SFXs.Click:Play()
+
+                        self.backBtnVisible:set(true)
+                        self.saveSlotBGPos:set(fromScale(0.5, -0.7))
+                        self.currentUI:set("SaveSlot")
+                        self.clickTipVisible:set(false)
                     end
-
                 end,
 
                 [Fusion.Children] = {
@@ -65,7 +86,10 @@ local function BtnsFrame(self: table) : Frame
                     Components.UIStroke(scope, {
                         Enabled = true,
                         Thickness = 3,
-                        Transparency = 0.3
+
+                        Transparency = Fusion.Tween(scope, Fusion.Computed(scope, function(use)
+                            return if use(backBtnHovering) then 0.3 else 1
+                        end), AssetBook.TweenInfos.twiceHalf),
                     }),
                     Fusion.New(scope, "UIPadding")({
                         PaddingTop = udNew(0.05, 0),
@@ -75,6 +99,7 @@ local function BtnsFrame(self: table) : Frame
                     })
                 }
             }),
+
             Components.ImageLabel(scope, {
                 Name = "Logo",
                 AnchorPoint = v2New(0.5, 0),

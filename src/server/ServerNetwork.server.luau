@@ -10,19 +10,8 @@ local Events = require(ServerScriptService.Modules.Data.ServerEvents)
 local Promise = require(ReplicatedStorage.Modules.Packages.Promise)
 local Spawn = require(ReplicatedStorage.Modules.Packages.Spawn)
 
-local CODE = { "MILKSHAKE", "CE", "PAHO" }
 local WORLDS = AssetBook.WorldInfo
 
-local function _teleportPrivateTests(id: string, rankNeeded: number, plr: Player, tpOptions: TeleportOptions)
-	local rank = plr:GetRankInGroup(16912246)
-
-	if rank >= rankNeeded then
-		TeleportService:TeleportAsync(WORLDS[id], { plr }, tpOptions)
-	else
-		Events.CreateHint:Fire(plr, "You don't have the permission to join test place!")
-		Events.TeleportFailed:Fire(plr)
-	end
-end
 local function teleportHandler(plr: Player, option: string, privateCode: string, dataChosen: string)
 	local teleportOptions = Instance.new("TeleportOptions")
 	teleportOptions:SetTeleportData({ dataChosen })
@@ -44,15 +33,12 @@ local function teleportHandler(plr: Player, option: string, privateCode: string,
 	elseif option == "CreatePrivate" then
 		task.wait(0.5)
 		Promise.new(function()
-			local slotChosen = tonumber(string.match(dataChosen, "%d"))
-			local lastSeenWorld = plr:GetAttribute("DATA"..slotChosen.."LastSeenWorld") :: string
-
-			local code = TeleportService:ReserveServer(WORLDS[lastSeenWorld])
+			local code = TeleportService:ReserveServer(WORLDS.Mainworld)
 
 			teleportOptions.ReservedServerAccessCode = code
 			teleportOptions:SetTeleportData({ dataChosen, code })
 
-			TeleportService:TeleportAsync(WORLDS[lastSeenWorld], { plr }, teleportOptions)
+			TeleportService:TeleportAsync(WORLDS.Mainworld, { plr }, teleportOptions)
 
 		end):Catch(function(err)
 			Events.TeleportFailed:Fire(plr)
@@ -62,7 +48,7 @@ local function teleportHandler(plr: Player, option: string, privateCode: string,
 			return
 		end)
 
-	elseif option == "JoinPrivate" and not table.find(CODE, privateCode) then
+	elseif option == "JoinPrivate" then
 		local connection: RBXScriptConnection
 
 		Spawn(function()
@@ -79,7 +65,7 @@ local function teleportHandler(plr: Player, option: string, privateCode: string,
 			if message.Data[1] == privateCode then
 				teleportOptions.ReservedServerAccessCode = message.Data[2]
 
-				TeleportService:TeleportAsync(message.Data[3], { plr }, teleportOptions)
+				TeleportService:TeleportAsync(WORLDS.Mainworld, { plr }, teleportOptions)
 
 				connection:Disconnect()
 			end
@@ -115,15 +101,6 @@ local function teleportHandler(plr: Player, option: string, privateCode: string,
 		end)
 
 		MessagingService:PublishAsync("JoinFriendRequest", visitorId)
-
-	elseif option == "JoinPrivate" and privateCode == "MILKSHAKE" then
-		_teleportPrivateTests("PrivateTest", 2, plr, teleportOptions)
-
-	elseif option == "JoinPrivate" and privateCode == "PAHO" then
-		_teleportPrivateTests("TimeDomain", 2, plr, teleportOptions)
-
-	elseif option == "JoinPrivate" and privateCode == "CE" then
-		TeleportService:Teleport(WORLDS.CE, plr)
 	end
 end
 Events.TeleportPrompt:Connect(teleportHandler)

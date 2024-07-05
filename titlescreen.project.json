@@ -2,6 +2,7 @@
     "name": "Critical-Story-TitleScreen",
     "tree": {
         "$className": "DataModel",
+
         "ReplicatedFirst": {
             "LoadingScreen": {
                 "$path": "src/LoadingScreen.client.luau"
@@ -35,12 +36,6 @@
         "StarterGui": {
             "$properties": {
                 "ScreenOrientation": "LandscapeSensor"
-            }
-        },
-        "TextChatService": {
-            "$properties": {
-                "ChatTranslationEnabled": false,
-                "ChatVersion": "LegacyChatService"
             }
         }
     }
