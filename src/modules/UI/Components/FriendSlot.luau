@@ -18,11 +18,11 @@ local function FriendSlot(info: table, self: table, scope: table) : Frame
     return Components.Frame(scope, {
         Name = Fusion.Computed(scope, function()
             if AssetBook.friendsStatusColors[info.LocationType] == fromRGB(0, 198, 96) then
-                return "B-InGame-"..info.UserName
+                return "B-InGame-"..info.VisitorId
             elseif AssetBook.friendsStatusColors[info.LocationType] == fromRGB(85, 170, 255) then
-                return "C-Online-"..info.UserName
+                return "C-Online-"..info.VisitorId
             else
-                return "D-Studio-"..info.UserName
+                return "D-Studio-"..info.VisitorId
             end
         end),
         Size = fromScale(0.98, 0.3),

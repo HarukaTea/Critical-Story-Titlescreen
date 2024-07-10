@@ -32,6 +32,18 @@ local function SaveSlot(index: number, self: table) : Frame
 
     local eraseConfirmed = 10
 
+    self.charSelfViews[index] = Fusion.Value(scope, New(scope, "ViewportFrame")({
+        BackgroundTransparency = 1,
+        Position = fromScale(0.076, 0.221),
+        Size = fromScale(0.877, 0.583),
+
+        Visible = if plr:GetAttribute("DATA"..index.."PlayTime") > 0 then true else false,
+
+        [Children] = {
+            New(scope, "Camera")({})
+        }
+    }))
+
     return Components.Frame(scope, {
         Name = "SaveSlot"..index,
         AnchorPoint = v2New(0, 0.5),
@@ -159,19 +171,7 @@ local function SaveSlot(index: number, self: table) : Frame
                 Visible = if plr:GetAttribute("DATA"..index.."PlayTime") > 0 then false else true,
             }),
 
-            New(scope, "ViewportFrame")({
-                BackgroundTransparency = 1,
-                Position = fromScale(0.076, 0.221),
-                Size = fromScale(0.877, 0.583),
-
-                Visible = if plr:GetAttribute("DATA"..index.."PlayTime") > 0 then true else false,
-
-                [Fusion.Ref] = self.charSelfViews[index],
-
-                [Children] = {
-                    New(scope, "Camera")({})
-                }
-            }),
+            self.charSelfViews[index],
 
             Components.HoverImageButton(scope, {
                 [Fusion.OnEvent("MouseButton1Click")] = function()

@@ -33,7 +33,8 @@ AssetBook.Class = {
     Alchemist = "rbxassetid://12236618949",
     Illusionist = "rbxassetid://15875390788",
     Juggernaut = "rbxassetid://16654290906",
-    Reaper = "rbxassetid://17667241921"
+    Reaper = "rbxassetid://17667241921",
+    WindDancer = "rbxassetid://18423401512"
 }
 
 AssetBook.friendsStatusColors = {

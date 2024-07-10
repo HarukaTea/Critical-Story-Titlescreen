@@ -20,6 +20,59 @@ local sFind, upper = string.find, string.upper
 local function FriendList(self: table) : Frame
     local scope = self.scope :: table
 
+    self.friendListFrame = Fusion.Value(scope, Components.ScrollingFrame(scope, {
+        Name = "FriendList",
+        AnchorPoint = v2New(),
+        Position = fromScale(0, 0.15),
+        Size = fromScale(1, 0.73),
+        ScrollingDirection = Enum.ScrollingDirection.Y,
+
+        CanvasSize = Computed(scope, function(use)
+            return if use(self.friendsAbsContentSize) > use(self.friendsAbsSize) then fromOffset(0, use(self.friendsAbsContentSize)) else fromOffset(0, 0)
+        end),
+        ScrollingEnabled = Computed(scope, function(use)
+            return if use(self.friendsAbsContentSize) > use(self.friendsAbsSize) then true else false
+        end),
+
+        [Children] = {
+            New(scope, "UIListLayout")({
+                Padding = udNew(0, 6),
+                HorizontalAlignment = Enum.HorizontalAlignment.Center,
+
+                [Fusion.OnChange("AbsoluteContentSize")] = function(newSize: Vector2)
+                    self.friendsAbsContentSize:set(newSize.Y)
+                end,
+            }),
+
+            New(scope, "Frame")({
+                Name = "AAA",
+                Size = fromOffset(0, 1),
+                BackgroundTransparency = 1
+            }),
+
+            Fusion.ForValues(scope, self.friends, function(_, localScope: table, info: table)
+                if sFind(info.LastLocation, "Critical Story") then
+                    return FriendSlot(info, self, localScope)
+                end
+
+                return nil
+            end),
+            Fusion.ForValues(scope, self.friends, function(_, localScope: table, info: table)
+                if not sFind(info.LastLocation, "Critical Story") then
+                    return FriendSlot(info, self, localScope)
+                end
+
+                return nil
+            end),
+
+            New(scope, "Frame")({
+                Name = "ZZZ",
+                Size = fromOffset(0, 1),
+                BackgroundTransparency = 1
+            })
+        }
+    }))
+
     return Components.Frame(scope, {
         Name = "FriendListFrame",
         Size = fromScale(0.6, 6),
@@ -61,60 +114,9 @@ local function FriendList(self: table) : Frame
                     })
                 }
             }),
-            Components.ScrollingFrame(scope, {
-                Name = "FriendList",
-                AnchorPoint = v2New(),
-                Position = fromScale(0, 0.15),
-                Size = fromScale(1, 0.73),
-                ScrollingDirection = Enum.ScrollingDirection.Y,
 
-                CanvasSize = Computed(scope, function(use)
-                    return if use(self.friendsAbsContentSize) > use(self.friendsAbsSize) then fromOffset(0, use(self.friendsAbsContentSize)) else fromOffset(0, 0)
-                end),
-                ScrollingEnabled = Computed(scope, function(use)
-                    return if use(self.friendsAbsContentSize) > use(self.friendsAbsSize) then true else false
-                end),
+            self.friendListFrame,
 
-                [Fusion.Ref] = self.friendListFrame,
-
-                [Children] = {
-                    New(scope, "UIListLayout")({
-                        Padding = udNew(0, 6),
-                        HorizontalAlignment = Enum.HorizontalAlignment.Center,
-
-                        [Fusion.OnChange("AbsoluteContentSize")] = function(newSize: Vector2)
-                            self.friendsAbsContentSize:set(newSize.Y)
-                        end,
-                    }),
-
-                    New(scope, "Frame")({
-                        Name = "AAA",
-                        Size = fromOffset(0, 1),
-                        BackgroundTransparency = 1
-                    }),
-
-                    Fusion.ForValues(scope, self.friends, function(_, localScope: table, info: table)
-                        if sFind(info.LastLocation, "Critical Story") then
-                            return FriendSlot(info, self, localScope)
-                        end
-
-                        return nil
-                    end),
-                    Fusion.ForValues(scope, self.friends, function(_, localScope: table, info: table)
-                        if not sFind(info.LastLocation, "Critical Story") then
-                            return FriendSlot(info, self, localScope)
-                        end
-
-                        return nil
-                    end),
-
-                    New(scope, "Frame")({
-                        Name = "ZZZ",
-                        Size = fromOffset(0, 1),
-                        BackgroundTransparency = 1
-                    })
-                }
-            }),
             New(scope, "Frame")({
                 Name = "BottomBar",
                 BackgroundColor3 = fromRGB(30, 30, 30),

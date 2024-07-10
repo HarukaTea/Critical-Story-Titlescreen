@@ -1,6 +1,6 @@
 --!nocheck
 
-return {
+local playerStats = {
 	Slot1 = {
 		Stats = {
 			Levels = 1,
@@ -10,58 +10,16 @@ return {
 			LastSeenLocation = "MonolithVillage",
 			LastSeenWorld = "Mainworld",
 			Cosmetic = "None",
-
-			V9Transfered = false
 		},
 
-		Inventory = {},
-
-		QuestsV3 = {
-			Main = 1,
-			Side = {},
-			Town = {}
-		}
-	},
-	Slot2 = {
-		Stats = {
-			Levels = 1,
-			PlayTime = 0,
-
-			Class = "Warrior",
-			LastSeenLocation = "MonolithVillage",
-			LastSeenWorld = "Mainworld",
-			Cosmetic = "None",
-
-			V9Transfered = false
-		},
-
-		Inventory = {},
-
-		QuestsV3 = {
-			Main = 1,
-			Side = {},
-			Town = {}
-		}
-	},
-	Slot3 = {
-		Stats = {
-			Levels = 1,
-			PlayTime = 0,
-
-			Class = "Warrior",
-			LastSeenLocation = "MonolithVillage",
-			LastSeenWorld = "Mainworld",
-			Cosmetic = "None",
-
-			V9Transfered = false
-		},
-
-		Inventory = {},
-
-		QuestsV3 = {
+		Quests = {
 			Main = 1,
 			Side = {},
 			Town = {}
 		}
 	}
 }
+playerStats.Slot2 = playerStats.Slot1
+playerStats.Slot3 = playerStats.Slot1
+
+return playerStats
