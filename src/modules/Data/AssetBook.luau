@@ -79,13 +79,18 @@ AssetBook.LocationInfo = {
     NiximForest = "Nixim Forest",
     AuraIsland = "Aura Islands",
     FirestoneIsland = "Firestone Islands",
+
+    --// ?
+    DeepThyrsusWoods = "?",
+    HigherLands = "?",
+    ThyrsusWoods = "?",
+    Baseplate = "?"
 }
 
 AssetBook.WorldInfo = {
-	Mainworld = 17553875545, PrivateTest = 12003361010, NiximCavern = 12294239008,
-	CE = 17302653565, TimeDomain = 11904003271, Everfrost = 12373196969,
-	Stronghold = 12373229403, Arkus = 13970315225, LoneTown = 16555333700,
-	SummerIsland = 17444533020
+	Mainworld = 17553948946, PrivateTest = 17553875545, NiximCavern = 18331826662,
+	Everfrost = 18331688502, Stronghold = 18331688973, Arkus = 18331795211, LoneTown = 18331808756,
+	SummerIsland = 18331781219, StrikeWorld = 18331860434
 }
 
 AssetBook.StorySeries = {

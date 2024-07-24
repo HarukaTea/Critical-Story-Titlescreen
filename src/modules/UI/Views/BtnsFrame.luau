@@ -66,7 +66,11 @@ local function BtnsFrame(self: table) : Frame
                         local clickDetect = UserInputService.InputBegan:Connect(function(input, gpe)
                             if gpe then return end
 
-                            if input.UserInputType == Enum.UserInputType.MouseButton1 then check = true end
+                            if input.UserInputType == Enum.UserInputType.MouseButton1
+                                or input.UserInputType == Enum.UserInputType.Touch then
+
+                                check = true
+                            end
                         end)
                         repeat RunService.RenderStepped:Wait() until check
 

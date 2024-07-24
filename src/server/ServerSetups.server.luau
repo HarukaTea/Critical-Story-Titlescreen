@@ -2,6 +2,7 @@
 
 local PhysicsService = game:GetService("PhysicsService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TeleportService = game:GetService("TeleportService")
 
 
 local function collisionRegister()
@@ -15,7 +16,9 @@ end
 collisionRegister()
 
 
-local function soundRegister()
+local function setup()
 	ReplicatedStorage.Package.Sounds.Parent = workspace
+
+	TeleportService:SetTeleportGui(ReplicatedStorage.Package.Unloads.TeleportUI)
 end
-soundRegister()
+setup()

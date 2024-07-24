@@ -32,7 +32,11 @@ local function FriendListFuncButton(id: string, self: table) : TextButton
         [Fusion.OnEvent("MouseButton1Click")] = function()
             self.isTeleporting:set(true)
 
-            Events.TeleportPrompt:Fire(id, Fusion.peek(self.privateCode), self.slotChosen)
+            Events.TeleportPrompt.Fire({
+                Option = id,
+                PrivateCode = Fusion.peek(self.privateCode),
+                SlotChosen = self.slotChosen
+            })
 
             workspace.Sounds.SFXs.Click:Play()
         end,

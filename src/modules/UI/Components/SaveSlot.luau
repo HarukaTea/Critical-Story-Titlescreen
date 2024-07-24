@@ -106,7 +106,7 @@ local function SaveSlot(index: number, self: table) : Frame
                         Signals.CreateHint:Fire("Erasing your data...")
 
                         wait(1)
-                        Events.DataWipe:Fire("Slot"..index)
+                        Events.DataWipe.Fire({ SlotChosen = "Slot"..index })
                     end
                 end,
 

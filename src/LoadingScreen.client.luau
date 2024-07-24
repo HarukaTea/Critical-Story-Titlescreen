@@ -29,8 +29,6 @@ local function setup()
     bG.Name = "BG"
     bG.AnchorPoint = Vector2.new(0.5, 0.5)
     bG.BackgroundColor3 = Color3.fromRGB(223, 223, 223)
-    bG.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    bG.BorderSizePixel = 0
     bG.Position = UDim2.fromScale(0.5, 0.5)
     bG.Size = UDim2.fromScale(1, 1)
 
@@ -38,24 +36,17 @@ local function setup()
     loadingTip.Name = "LoadingTip"
     loadingTip.FontFace = Font.new(
         "rbxasset://fonts/families/SourceSansPro.json",
-        Enum.FontWeight.Bold,
-        Enum.FontStyle.Normal
+        Enum.FontWeight.Bold
     )
     loadingTip.Text = "LOADING ADVENTURE..."
     loadingTip.TextColor3 = Color3.fromRGB(0, 0, 0)
     loadingTip.TextScaled = true
-    loadingTip.TextSize = 14
-    loadingTip.TextWrapped = true
     loadingTip.AnchorPoint = Vector2.new(0.5, 0.5)
-    loadingTip.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     loadingTip.BackgroundTransparency = 1
-    loadingTip.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    loadingTip.BorderSizePixel = 0
     loadingTip.Position = UDim2.fromScale(0.5, 0.5)
     loadingTip.Size = UDim2.fromScale(1, 0.07)
 
     local uITextSizeConstraint = Instance.new("UITextSizeConstraint")
-    uITextSizeConstraint.Name = "UITextSizeConstraint"
     uITextSizeConstraint.MaxTextSize = 36
     uITextSizeConstraint.Parent = loadingTip
 
@@ -75,17 +66,18 @@ local function setup()
     end)
 
     --- wait until data loads
-    repeat RunService.RenderStepped:Wait() until plr:GetAttribute("PlayerDataLoaded1")
-    repeat RunService.RenderStepped:Wait() until plr:GetAttribute("PlayerDataLoaded2")
-    repeat RunService.RenderStepped:Wait() until plr:GetAttribute("PlayerDataLoaded3")
+    repeat RunService.Heartbeat:Wait() until plr:GetAttribute("PlayerDataLoaded1")
+    repeat RunService.Heartbeat:Wait() until plr:GetAttribute("PlayerDataLoaded2")
+    repeat RunService.Heartbeat:Wait() until plr:GetAttribute("PlayerDataLoaded3")
 
     loadingTip.Text = "LOADED ADVENTURE!"
 
     loadFinished = true
     print("Load Finished")
 
-    workspace.CurrentCamera.CameraType = Enum.CameraType.Scriptable
-    workspace.CurrentCamera.CFrame = CFrame.new(121, 112.7, 1832.6, -1, 0, 0, 0, 1, 0.04, 0, 0.04, -1)
+    local camera = workspace.CurrentCamera
+    camera.CameraType = Enum.CameraType.Scriptable
+    camera.CFrame = CFrame.new(121, 112.7, 1832.6, -1, 0, 0, 0, 1, 0.04, 0, 0.04, -1)
 
     --- fade out
     local halfTween = TweenInfo.new(0.5)

@@ -125,6 +125,8 @@ return function(plr: Player)
 						[Children] = {
 							New(scope, "UIPadding")({ PaddingLeft = UDim.new(0.01, 0) }),
 							New(scope, "UITextSizeConstraint")({ MaxTextSize = 14 }),
+
+							Components.TextUIStroke(scope, { Thickness = 2.5 })
 						},
 					}),
 				},
@@ -144,13 +146,13 @@ return function(plr: Player)
 						Position = fromScale(0.5, 0.5),
 						Size = fromScale(1, 0.6),
 						Text = "Travelling to Critical Worlds...",
+						TextColor3 = Color3.fromRGB(),
 
 						Visible = Computed(scope, function(use)
 							return use(self.isTeleporting)
 						end),
 
 						[Children] = {
-							Components.TextUIStroke(scope, { Thickness = 3 }),
 							New(scope, "UITextSizeConstraint")({ MaxTextSize = 36 }),
 						},
 					}),
@@ -178,6 +180,16 @@ return function(plr: Player)
 					FriendListFrame(self),
 				},
 			}),
+
+			Components.Frame(scope, {
+				Name = "TeleportingFrame",
+				BackgroundColor3 = Color3.fromRGB(223, 223, 223),
+				ZIndex = 0,
+
+				BackgroundTransparency = Tween(scope, Computed(scope, function(use: Fusion.Use)
+					return if use(self.isTeleporting) then 0 else 1
+				end), AssetBook.TweenInfos.twiceHalf)
+			})
 		},
 	})
 
@@ -185,12 +197,10 @@ return function(plr: Player)
 	local function teleportFailed()
 		self.isTeleporting:set(false)
 	end
-	Events.TeleportFailed:Connect(teleportFailed)
+	table.insert(scope, Events.TeleportFailed.On(teleportFailed))
 
 	--// Clear
 	local function _onDead()
-		Events.TeleportFailed:DisconnectAll()
-
 		Fusion.doCleanup(self.scope)
 	end
 	self.char.Humanoid.Died:Once(_onDead)
@@ -229,7 +239,11 @@ return function(plr: Player)
 	local clickDetect = UserInputService.InputBegan:Connect(function(input, gpe)
 		if gpe then return end
 
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then check = true end
+		if input.UserInputType == Enum.UserInputType.MouseButton1
+			or input.UserInputType == Enum.UserInputType.Touch then
+
+			check = true
+		end
 	end)
 	repeat RS.RenderStepped:Wait() until check
 

@@ -12,7 +12,9 @@ local Spawn = require(ReplicatedStorage.Modules.Packages.Spawn)
 
 local WORLDS = AssetBook.WorldInfo
 
-local function teleportHandler(plr: Player, option: string, privateCode: string, dataChosen: string)
+Events.TeleportPrompt.SetCallback(function(plr, data)
+	local option, privateCode, dataChosen = data.Option, data.PrivateCode, data.SlotChosen
+
 	local teleportOptions = Instance.new("TeleportOptions")
 	teleportOptions:SetTeleportData({ dataChosen })
 
@@ -41,8 +43,8 @@ local function teleportHandler(plr: Player, option: string, privateCode: string,
 			TeleportService:TeleportAsync(WORLDS.Mainworld, { plr }, teleportOptions)
 
 		end):Catch(function(err)
-			Events.TeleportFailed:Fire(plr)
-			Events.CreateHint:Fire(plr, "Error occurred when creating private server!")
+			Events.TeleportFailed.Fire(plr, {})
+			Events.CreateHint.Fire(plr, { Hint = "Error occurred when creating private server!" })
 
 			warn("[Private Create]: "..err)
 			return
@@ -56,8 +58,8 @@ local function teleportHandler(plr: Player, option: string, privateCode: string,
 			if connection then
 				connection:Disconnect()
 
-				Events.CreateHint:Fire(plr, "Invalid code!")
-				Events.TeleportFailed:Fire(plr)
+				Events.CreateHint.Fire(plr, { Hint = "Invalid code!" })
+				Events.TeleportFailed.Fire(plr, {})
 			end
 		end)
 
@@ -82,8 +84,8 @@ local function teleportHandler(plr: Player, option: string, privateCode: string,
 			if connection then
 				connection:Disconnect()
 
-				Events.CreateHint:Fire(plr, "Failed to join friend!")
-				Events.TeleportFailed:Fire(plr)
+				Events.CreateHint.Fire(plr, { Hint = "Failed to join friend!" })
+				Events.TeleportFailed.Fire(plr, {})
 			end
 		end)
 
@@ -102,12 +104,11 @@ local function teleportHandler(plr: Player, option: string, privateCode: string,
 
 		MessagingService:PublishAsync("JoinFriendRequest", visitorId)
 	end
-end
-Events.TeleportPrompt:Connect(teleportHandler)
+end)
 
 
 local function teleportFailed(plr: Player)
-	Events.TeleportFailed:Fire(plr)
-	Events.CreateHint:Fire(plr, "Teleport failed!")
+	Events.TeleportFailed.Fire(plr, {})
+	Events.CreateHint.Fire(plr, { Hint = "Teleport failed!" })
 end
 TeleportService.TeleportInitFailed:Connect(teleportFailed)

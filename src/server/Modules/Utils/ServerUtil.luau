@@ -32,7 +32,7 @@ function ServerUtil:WeldPart(part: Part, welded: Model)
 end
 
 function ServerUtil:EquipWeapon(char: Model, class: string)
-	local styleFolder = ReplicatedStorage.Package.StyleWeapons[class] :: Folder
+	local styleFolder = ReplicatedStorage.Package.ClassWeapons[class] :: Folder
 
 	for _, child: Instance in char:GetChildren() do
 		if child:HasTag("Weapon") then child:Destroy() end

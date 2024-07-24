@@ -47,6 +47,9 @@ local function setup(plr: Player)
 			--// Done
 			plr:SetAttribute("PlayerDataLoaded"..i, true)
 		end
+
+	end):catch(function()
+		plr:Kick("Data loaded failed! This is an internal error, please try rejoin again.")
 	end)
 end
 local function clear(plr: Player)
@@ -73,21 +76,22 @@ dataKeepStore:andThen(function(store)
 end)
 
 
-local function wipeData(plr: Player, slot: string)
+Events.DataWipe.SetCallback(function(plr, data)
+	local slot = data.SlotChosen
+
 	local profile = profiles[plr]
 	if not profile then
-		Events.CreateHint:Fire(plr, "Error occured when resetting your data!")
+		Events.CreateHint.Fire(plr, { Hint = "Error occured when resetting your data!" })
 		return
 	end
 
 	local whiteList = { "Slot1", "Slot2", "Slot3" } --// avoid bypass
 	if not table.find(whiteList, slot) then
-		Events.CreateHint:Fire(plr, "Error occured when resetting your data!")
+		Events.CreateHint.Fire(plr, { Hint = "Error occured when resetting your data!" })
 		return
 	end
 
 	profile.Data[slot] = TEMPLATE["Slot1"]
 
 	plr:Kick("Data has wiped, rejoin to continue!")
-end
-Events.DataWipe:Connect(wipeData)
+end)

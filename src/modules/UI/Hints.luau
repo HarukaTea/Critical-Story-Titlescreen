@@ -29,23 +29,23 @@ return function(plr: Player)
 	Components.ScreenGui(scope, {
 		Name = "Hints",
 		DisplayOrder = 100,
-		Parent = plr.PlayerGui,
+		Parent = plr:FindFirstChildOfClass("PlayerGui"),
 
 		[Children] = {
 			Components.Frame(scope, {
 				Name = "BG",
-				Position = fromScale(0.5, 0.511),
-				Size = fromScale(1, 0.979),
+				Position = fromScale(0.5, 0.25),
 				ZIndex = 999,
 
 				[Children] = {
 					New(scope, "UIListLayout")({
 						Padding = udNew(0, 5),
 						HorizontalAlignment = Enum.HorizontalAlignment.Center,
+						VerticalAlignment = Enum.VerticalAlignment.Bottom,
 					}),
 					New(scope, "UIPadding")({ PaddingTop = udNew(0, 10) }),
 
-					Fusion.ForValues(scope, hintsList, function(_, localScope: table, text: string)
+					Fusion.ForValues(scope, hintsList, function(_, localScope: Fusion.Scope, text: string)
 						local overallTrans = Fusion.Value(localScope, 0)
 						Spawn(function()
 							wait(2.7)
@@ -61,12 +61,16 @@ return function(plr: Player)
 							FontFace = fontFromName("Ubuntu", Enum.FontWeight.Bold),
 							TextScaled = false,
 
-							BackgroundTransparency = Fusion.Tween(localScope, Computed(localScope, function(use)
+							BackgroundTransparency = Fusion.Tween(localScope, Computed(localScope, function(use: Fusion.Use)
 								return use(overallTrans)
 							end), AssetBook.TweenInfos.twiceHalf),
-							TextTransparency = Fusion.Tween(localScope, Computed(localScope, function(use)
+							TextTransparency = Fusion.Tween(localScope, Computed(localScope, function(use: Fusion.Use)
 								return use(overallTrans)
 							end), AssetBook.TweenInfos.twiceHalf),
+
+							[Fusion.OnEvent("MouseButton1Click")] = function()
+								overallTrans:set(1)
+							end,
 
 							[Children] = {
 								New(localScope, "UICorner")({ CornerRadius = udNew(0.25, 0) }),
@@ -83,12 +87,12 @@ return function(plr: Player)
 		},
 	})
 
-	local function _createHint(text: string)
+	local function _createHint(text: string, option: string)
 		local past = Fusion.peek(hintsList)
 		insert(past, text)
 
 		hintsList:set(past)
-		workspace.Sounds.SFXs.Error:Play()
+		workspace.Sounds.SFXs[if option == "Hint" then "NewInfo" else "Error"]:Play()
 
 		wait(3)
 		local now = Fusion.peek(hintsList)
@@ -96,13 +100,12 @@ return function(plr: Player)
 
 		hintsList:set(now)
 	end
-	Events.CreateHint:Connect(_createHint)
-	Signals.CreateHint:Connect(_createHint)
+	table.insert(scope, Events.CreateHint.On(function(data)
+		_createHint(data.Hint, data.Option)
+	end))
+	table.insert(scope, Signals.CreateHint:Connect(_createHint))
 
 	local function _onDead()
-		Events.CreateHint:DisconnectAll()
-		Signals.CreateHint:DisconnectAll()
-
 		Fusion.doCleanup(scope)
 	end
 	char.Humanoid.Died:Once(_onDead)

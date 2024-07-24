@@ -90,7 +90,11 @@ local function FriendSlot(info: table, self: table, scope: table) : Frame
                 [Fusion.OnEvent("MouseButton1Click")] = function()
                     self.isTeleporting:set(true)
 
-                    Events.TeleportPrompt:Fire("JoinFriend", info.VisitorId, Fusion.peek(self.slotChosen))
+                    Events.TeleportPrompt.Fire({
+                        Option = "JoinFriend",
+                        PrivateCode = info.VisitorId,
+                        SlotChosen = Fusion.peek(self.slotChosen)
+                    })
 
                     workspace.Sounds.SFXs.Click:Play()
                 end,
