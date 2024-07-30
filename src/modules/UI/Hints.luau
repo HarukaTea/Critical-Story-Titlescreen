@@ -1,5 +1,6 @@
 --!nocheck
 
+local LocalizationService = game:GetService("LocalizationService")
 local RepS = game:GetService("ReplicatedStorage")
 
 local AssetBook = require(RepS.Modules.Data.AssetBook)
@@ -25,6 +26,7 @@ return function(plr: Player)
 	local scope = Fusion.scoped({})
 	local hintsList = Fusion.Value(scope, {})
 	local char = plr.Character or plr.CharacterAdded:Wait()
+	local translator = LocalizationService:GetTranslatorForPlayer(plr)
 
 	Components.ScreenGui(scope, {
 		Name = "Hints",
@@ -89,6 +91,8 @@ return function(plr: Player)
 
 	local function _createHint(text: string, option: string)
 		local past = Fusion.peek(hintsList)
+		text = translator:Translate(workspace, text)
+
 		insert(past, text)
 
 		hintsList:set(past)

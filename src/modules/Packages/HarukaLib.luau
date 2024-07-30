@@ -66,7 +66,7 @@ end
 ]]
 function HarukaLib:PlayCutscene(pointsFolder: Folder | Model, duration: number)
 	local camera = workspace.CurrentCamera
-	local signal = Signal.new()
+	local signal = Signal()
 
 	--// Private
 	local function _getCF(points: table, t: number) : CFrame

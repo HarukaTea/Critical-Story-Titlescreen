@@ -15,8 +15,8 @@ local function setup()
     ServerUtil:SetCollisionGroup(char, "Player")
 
     repeat task.wait() until plr:GetAttribute("PlayerDataLoaded1")
-    repeat task.wait()  until plr:GetAttribute("PlayerDataLoaded2")
-    repeat task.wait()  until plr:GetAttribute("PlayerDataLoaded3")
+    repeat task.wait() until plr:GetAttribute("PlayerDataLoaded2")
+    repeat task.wait() until plr:GetAttribute("PlayerDataLoaded3")
 
     local container = Instance.new("Folder")
     container.Name = plr.Name
@@ -31,13 +31,7 @@ local function setup()
         clonedChar.PrimaryPart = clonedChar:WaitForChild("Humanoid", 999).RootPart
 
         ServerUtil:SetCollisionGroup(clonedChar, "ClonedCharacter")
-
-        local cosmetic = plr:GetAttribute("DATA"..i.."Cosmetic") :: string
-        if cosmetic == "None" then
-            ServerUtil:EquipWeapon(clonedChar, plr:GetAttribute("DATA"..i.."Class"))
-        else
-            ServerUtil:EquipArmor(clonedChar, cosmetic)
-        end
+        ServerUtil:EquipWeapon(clonedChar, plr:GetAttribute("DATA"..i.."Class"))
 
         clonedChar.Parent = container
 

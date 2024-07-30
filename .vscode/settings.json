@@ -6,7 +6,6 @@
         "src/modules/Packages/Warp/Util/Buffer.luau"
     ],
     "robloxLsp.diagnostics.disable": ["undefined-type", "redefined-type"],
-    "roblox-ui.sourcemap.rojoProjectFile": "titlescreen.project.json",
 
     "files.exclude": {
         "**/.git": true,
@@ -14,9 +13,6 @@
         "**/.hg": true,
         "**/CVS": true,
         "**/.DS_Store": true,
-        "**/Thumbs.db": true,
-
-        "src/character/Health.server.luau": true,
-        "src/client/RbxCharacterSounds.client.luau": true
+        "**/Thumbs.db": true
     }
 }

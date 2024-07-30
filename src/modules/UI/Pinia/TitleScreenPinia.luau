@@ -32,7 +32,7 @@ local function TitleScreenPinia(self: table)
     self.friendsRequestCD = false
     self.friendFramePos = Value(fromScale(1.5, -0.7))
     self.friends = Value({})
-    self.friendsAbsContentSize, self.friendsAbsSize = Value(0), Value(0)
+    self.friendsAbsContentSize, self.friendsAbsSize = Value(Vector2.new()), Value(Vector2.new())
     self.privateCode = Value("")
 
     self.isTeleporting = Value(false)

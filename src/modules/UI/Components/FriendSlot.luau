@@ -7,7 +7,7 @@ local Components = require(RepS.Modules.UI.Vanilla)
 local Events = require(RepS.Modules.Data.Events)
 local Fusion = require(RepS.Modules.Packages.Fusion)
 
-local Children, New = Fusion.Children, Fusion.New
+local Children, New, Computed = Fusion.Children, Fusion.New, Fusion.Computed
 
 local v2New = Vector2.new
 local fromScale = UDim2.fromScale
@@ -16,7 +16,7 @@ local fromRGB = Color3.fromRGB
 
 local function FriendSlot(info: table, self: table, scope: table) : Frame
     return Components.Frame(scope, {
-        Name = Fusion.Computed(scope, function()
+        Name = Computed(scope, function()
             if AssetBook.friendsStatusColors[info.LocationType] == fromRGB(0, 198, 96) then
                 return "B-InGame-"..info.VisitorId
             elseif AssetBook.friendsStatusColors[info.LocationType] == fromRGB(85, 170, 255) then
@@ -65,8 +65,17 @@ local function FriendSlot(info: table, self: table, scope: table) : Frame
                 Position = fromScale(0.11, 0.098),
                 Size = fromScale(0.85, 0.35),
                 RichText = true,
-                Text = info.DisplayName..[[<font color="#999">]].." (@"..info.UserName..")</font>",
                 TextXAlignment = Enum.TextXAlignment.Left,
+
+                Text = Computed(scope, function()
+                    local displayName, userName = info.DisplayName :: string, info.UserName :: string
+
+                    if displayName == userName then
+                        return displayName
+                    else
+                        return displayName..[[<font color="#999">]].." (@"..userName..")</font>"
+                    end
+                end)
             }),
             Components.TextLabel(scope, {
                 Name = "Playing",
@@ -85,7 +94,14 @@ local function FriendSlot(info: table, self: table, scope: table) : Frame
                 AnchorPoint = v2New(0, 0.5),
                 Text = "JOIN",
 
-                Visible = if info.PlaceId == AssetBook.WorldInfo.Mainworld then true else false,
+                Visible = Computed(scope, function()
+                    local found = false
+                    for _, world in AssetBook.WorldInfo do
+                        if info.PlaceId == world then found = true break end
+                    end
+
+                    return found
+                end),
 
                 [Fusion.OnEvent("MouseButton1Click")] = function()
                     self.isTeleporting:set(true)

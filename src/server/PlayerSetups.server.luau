@@ -3,17 +3,19 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local TeleportService = game:GetService("TeleportService")
 
 local DataKeep = require(ReplicatedStorage.Modules.Packages.DataKeep)
 local Events = require(ServerScriptService.Modules.Data.ServerEvents)
 local HarukaLib = require(ReplicatedStorage.Modules.Packages.HarukaLib)
+local Promise = require(ReplicatedStorage.Modules.Packages.Promise)
 local Spawn = require(ReplicatedStorage.Modules.Packages.Spawn)
 
 local profiles = {}
 
 local TEMPLATE = require(ServerScriptService.Modules.Data.PlayerTemplate)
 
-local dataKeepStore = DataKeep.GetStore("CS_1599MKK40", TEMPLATE)
+local dataKeepStore = DataKeep.GetStore("CS_1599MKK40_OLD", TEMPLATE)
 
 local function setup(plr: Player)
 	dataKeepStore:LoadKeep("Player_"..plr.UserId):andThen(function(keep)
@@ -35,6 +37,44 @@ local function setup(plr: Player)
 			return
 		end
 
+		--// Check if not transfered
+		local transfered = true
+		for i = 1, 3 do
+			if keep.Data["Slot"..i].DataTransferedV1 == false then transfered = false break end
+		end
+
+		--// check from
+		local from = plr:GetJoinData().SourcePlaceId :: number
+		if from == 7523159032 and not transfered then
+			print("Starting to transfering data...")
+
+			transfered = true
+			local dataTransfered = plr:GetJoinData().TeleportData :: table
+
+			--- decomplie data
+			Promise.new(function()
+				for i = 1, 3 do
+					keep.Data["Slot"..i].Inventory = dataTransfered["Slot"..i].Inventory or {}
+
+					for attr: string, val: any in keep.Data["Slot"..i].Stats do
+						keep.Data["Slot"..i].Stats[attr] = dataTransfered["Slot"..i].Stats[attr] or val
+					end
+
+					keep.Data["Slot"..i].DataTransferedV1 = true
+				end
+
+			end):Catch(function()
+				plr:Kick("A error occured when transfering data, please try again later?")
+			end)
+		end
+
+		--// Check if not transfered
+		if not transfered then
+			TeleportService:Teleport(7523159032, plr)
+			return
+		end
+
+		--- load profile
 		profiles[plr] = keep
 
 		for i = 1, 3 do

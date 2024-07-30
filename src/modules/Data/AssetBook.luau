@@ -99,10 +99,7 @@ AssetBook.StorySeries = {
     "Valiant Explorer",
     "Critical Power",
     "The Future",
-    "Paho - The Executor",
-    "Initus Bay",
-    "The Next Journey",
-    "The End",
+    "Encounter"
 }
 
 return AssetBook

@@ -15,7 +15,7 @@ local v2New = Vector2.new
 local fromScale, fromOffset = UDim2.fromScale, UDim2.fromOffset
 local udNew = UDim.new
 local fromRGB = Color3.fromRGB
-local sFind, upper = string.find, string.upper
+local upper = string.upper
 
 local function FriendList(self: table) : Frame
     local scope = self.scope :: table
@@ -28,10 +28,10 @@ local function FriendList(self: table) : Frame
         ScrollingDirection = Enum.ScrollingDirection.Y,
 
         CanvasSize = Computed(scope, function(use)
-            return if use(self.friendsAbsContentSize) > use(self.friendsAbsSize) then fromOffset(0, use(self.friendsAbsContentSize)) else fromOffset(0, 0)
+            return if use(self.friendsAbsContentSize).Y > use(self.friendsAbsSize).Y then fromOffset(0, use(self.friendsAbsContentSize).Y) else fromOffset(0, 0)
         end),
         ScrollingEnabled = Computed(scope, function(use)
-            return if use(self.friendsAbsContentSize) > use(self.friendsAbsSize) then true else false
+            return if use(self.friendsAbsContentSize).Y > use(self.friendsAbsSize).Y then true else false
         end),
 
         [Children] = {
@@ -39,9 +39,7 @@ local function FriendList(self: table) : Frame
                 Padding = udNew(0, 6),
                 HorizontalAlignment = Enum.HorizontalAlignment.Center,
 
-                [Fusion.OnChange("AbsoluteContentSize")] = function(newSize: Vector2)
-                    self.friendsAbsContentSize:set(newSize.Y)
-                end,
+                [Fusion.Out("AbsoluteContentSize")] = self.friendsAbsContentSize,
             }),
 
             New(scope, "Frame")({
@@ -51,16 +49,20 @@ local function FriendList(self: table) : Frame
             }),
 
             Fusion.ForValues(scope, self.friends, function(_, localScope: table, info: table)
-                if sFind(info.LastLocation, "Critical Story") then
-                    return FriendSlot(info, self, localScope)
+                local found = false
+                for _, world in AssetBook.WorldInfo do
+                    if info.PlaceId == world then found = true break end
                 end
+                if found then return FriendSlot(info, self, localScope) end
 
                 return nil
             end),
             Fusion.ForValues(scope, self.friends, function(_, localScope: table, info: table)
-                if not sFind(info.LastLocation, "Critical Story") then
-                    return FriendSlot(info, self, localScope)
+                local found = false
+                for _, world in AssetBook.WorldInfo do
+                    if info.PlaceId == world then found = true break end
                 end
+                if not found then return FriendSlot(info, self, localScope) end
 
                 return nil
             end),
@@ -85,9 +87,7 @@ local function FriendList(self: table) : Frame
             return not use(self.isTeleporting)
         end),
 
-        [Fusion.OnChange("AbsoluteSize")] = function(newSize: Vector2)
-            self.friendsAbsSize:set(newSize.Y)
-        end,
+        [Fusion.Out("AbsoluteSize")] = self.friendsAbsSize,
 
         [Children] = {
             New(scope, "UICorner")({ CornerRadius = udNew(0.05, 0) }),

@@ -5,7 +5,7 @@ local Players = game:GetService("Players")
 
 local plr = Players.LocalPlayer
 
-local DESIGN_VP_SIZE = Vector2.new(1172, 466)
+local DESIGN_VP_SIZE = Vector2.new(1172, 466.4)
 
 local function _calScreenRatio() : number
 	local function __average(vector2: Vector2) : number

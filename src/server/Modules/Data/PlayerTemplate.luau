@@ -1,25 +1,49 @@
 --!nocheck
 
-local playerStats = {
+local slotStats = {
 	Slot1 = {
+		DataTransferedV1 = false,
+
 		Stats = {
 			Levels = 1,
+			EXP = 0,
+			Gold = 0,
+			RP = 0,
 			PlayTime = 0,
 
 			Class = "Warrior",
 			LastSeenLocation = "MonolithVillage",
 			LastSeenWorld = "Mainworld",
-			Cosmetic = "None",
+
+			LvPoints = 0,
+			DMGPoints = 0,
+			MagicPoints = 0,
+			ManaPoints = 0,
+			HealthPoints = 0,
+			ShieldPoints = 0
 		},
 
 		Quests = {
 			Main = 1,
 			Side = {},
 			Town = {}
-		}
+		},
+
+		Settings = {
+			Musics = true,
+			SFXs = true,
+			PotatoMode = false,
+			PlayerList = true,
+			MapDetails = true,
+			CombatMode = "Solo",
+			MapShadows = true
+		},
+
+		Inventory = {},
+		ClassUnlocks = { "Warrior" }
 	}
 }
-playerStats.Slot2 = playerStats.Slot1
-playerStats.Slot3 = playerStats.Slot1
+slotStats.Slot2 = slotStats.Slot1
+slotStats.Slot3 = slotStats.Slot1
 
-return playerStats
+return slotStats

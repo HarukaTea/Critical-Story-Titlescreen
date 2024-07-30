@@ -6,6 +6,7 @@ local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
+local TeleportService = game:GetService("TeleportService")
 local TweenService = game:GetService("TweenService")
 
 local plr = Players.LocalPlayer
@@ -86,11 +87,17 @@ local function setup()
     TweenService:Create(bG, halfTween, { BackgroundTransparency = 1 }):Play()
     Debris:AddItem(loadingScreen, 0.5)
 
-    workspace.Sounds.TitleScreen:Play()
+    task.spawn(function()
+        --- sometimes, uh, pretty rare situation
+        workspace:WaitForChild("Sounds", 999).TitleScreen:Play()
+    end)
 
     --// Play the cutscene
     local HarukaLib = require(ReplicatedStorage.Modules.Packages.HarukaLib)
 
     HarukaLib:PlayCutscene(workspace.MapComponents.IntroCutscene, 12)
+
+    --// Set teleport gui
+    TeleportService:SetTeleportGui(ReplicatedStorage:WaitForChild("Package").Unloads.TeleportUI)
 end
 setup()
