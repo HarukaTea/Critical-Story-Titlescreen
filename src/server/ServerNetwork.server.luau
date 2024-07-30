@@ -24,7 +24,7 @@ Events.TeleportPrompt.SetCallback(function(plr, data)
 			local slotChosen = tonumber(string.match(dataChosen, "%d"))
 			local lastSeenWorld = plr:GetAttribute("DATA"..slotChosen.."LastSeenWorld") :: string
 
-			TeleportService:TeleportAsync(WORLDS[lastSeenWorld], { plr }, teleportOptions)
+			TeleportService:TeleportAsync(WORLDS.Mainworld, { plr }, teleportOptions)
 
 		end):Catch(function(err)
 			warn("[Public Teleport]: "..err)

@@ -93,11 +93,11 @@ local function setup()
     end)
 
     --// Play the cutscene
-    local HarukaLib = require(ReplicatedStorage.Modules.Packages.HarukaLib)
+    local HarukaLib = require(ReplicatedStorage:WaitForChild("Modules", 999).Packages.HarukaLib)
 
-    HarukaLib:PlayCutscene(workspace.MapComponents.IntroCutscene, 12)
+    HarukaLib:PlayCutscene(workspace:WaitForChild("MapComponents", 999).IntroCutscene, 12)
 
     --// Set teleport gui
-    TeleportService:SetTeleportGui(ReplicatedStorage:WaitForChild("Package").Unloads.TeleportUI)
+    TeleportService:SetTeleportGui(ReplicatedStorage:WaitForChild("Package", 999).Unloads.TeleportUI)
 end
 setup()

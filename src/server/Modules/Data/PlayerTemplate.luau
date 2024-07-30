@@ -2,7 +2,7 @@
 
 local slotStats = {
 	Slot1 = {
-		DataTransferedV1 = false,
+		DataTransferedV3 = false,
 
 		Stats = {
 			Levels = 1,

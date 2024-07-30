@@ -89,7 +89,7 @@ function HarukaLib:PlayCutscene(pointsFolder: Folder | Model, duration: number)
 		return tonumber(a.Name) < tonumber(b.Name)
 	end)
 	for _, point: BasePart in ipairs(instances) do
-		points[#points + 1] = point.CFrame
+		table.insert(points, point.CFrame)
 	end
 
 	--- play
@@ -99,19 +99,30 @@ function HarukaLib:PlayCutscene(pointsFolder: Folder | Model, duration: number)
 	local start = os.clock()
 	local passedTime = 0
 
-	RunService:BindToRenderStep("HarukaCutscene", priority, function()
-		passedTime = os.clock() - start
+	local ok, _ = pcall(function()
+		RunService:BindToRenderStep("HarukaCutscene", priority, function()
+			passedTime = os.clock() - start
 
-		if passedTime <= duration then
-			camera.CameraType = Enum.CameraType.Scriptable
-			camera.CFrame = _getCF(points, passedTime / duration)
-		else
-			RunService:UnbindFromRenderStep("HarukaCutscene")
+			if passedTime <= duration then
+				camera.CameraType = Enum.CameraType.Scriptable
+				camera.CFrame = _getCF(points, passedTime / duration)
+			else
+				RunService:UnbindFromRenderStep("HarukaCutscene")
 
-			signal:Fire("Completed")
-			signal:Destroy()
-		end
+				signal:Fire("Completed")
+				signal:Destroy()
+			end
+		end)
 	end)
+	if not ok then
+		RunService:UnbindFromRenderStep("HarukaCutscene")
+
+		camera.CameraType = Enum.CameraType.Scriptable
+		camera.CFrame = workspace:WaitForChild("MapComponents", 999).IntroCutscene["4"].CFrame
+
+		signal:Fire("Completed")
+		signal:Destroy()
+	end
 
 	return signal
 end
