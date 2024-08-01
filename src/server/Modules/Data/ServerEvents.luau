@@ -113,7 +113,17 @@ if not RunService:IsRunning() then
 			FireList = noop,
 			FireSet = noop
 		}),
+		CreateFullScreenHint = table.freeze({
+			Fire = noop,
+			FireAll = noop,
+			FireExcept = noop,
+			FireList = noop,
+			FireSet = noop
+		}),
 		DataWipe = table.freeze({
+			SetCallback = noop
+		}),
+		DataTransfer = table.freeze({
 			SetCallback = noop
 		}),
 		TeleportFailed = table.freeze({
@@ -178,7 +188,7 @@ end
 
 RunService.Heartbeat:Connect(SendEvents)
 
-local events = table.create(4)
+local events = table.create(6)
 reliable.OnServerEvent:Connect(function(player, buff, inst)
 	incoming_buff = buff
 	incoming_inst = inst
@@ -187,25 +197,35 @@ reliable.OnServerEvent:Connect(function(player, buff, inst)
 	local len = buffer.len(buff)
 	while incoming_read < len do
 		local id = buffer.readu8(buff, read(1))
-		if id == 2 then
+		if id == 3 then
 			local value
 			value = {}
 			local len_1 = buffer.readu16(incoming_buff, read(2))
 			value.SlotChosen = buffer.readstring(incoming_buff, read(len_1), len_1)
-			if events[2] then
-				task.spawn(events[2], player, value)
+			if events[3] then
+				task.spawn(events[3], player, value)
 			end
 		elseif id == 4 then
 			local value
 			value = {}
-			local len_1 = buffer.readu16(incoming_buff, read(2))
-			value.Option = buffer.readstring(incoming_buff, read(len_1), len_1)
-			local len_2 = buffer.readu16(incoming_buff, read(2))
-			value.PrivateCode = buffer.readstring(incoming_buff, read(len_2), len_2)
-			local len_3 = buffer.readu16(incoming_buff, read(2))
-			value.SlotChosen = buffer.readstring(incoming_buff, read(len_3), len_3)
 			if events[4] then
 				task.spawn(events[4], player, value)
+			end
+		elseif id == 6 then
+			local value
+			value = {}
+			local len_1 = buffer.readu16(incoming_buff, read(2))
+			value.Option = buffer.readstring(incoming_buff, read(len_1), len_1)
+			if buffer.readu8(incoming_buff, read(1)) == 1 then
+				incoming_ipos = incoming_ipos + 1
+				value.PrivateCode = incoming_inst[incoming_ipos]
+			else
+				value.PrivateCode = nil
+			end
+			local len_2 = buffer.readu16(incoming_buff, read(2))
+			value.SlotChosen = buffer.readstring(incoming_buff, read(len_2), len_2)
+			if events[6] then
+				task.spawn(events[6], player, value)
 			end
 		else
 			error("Unknown event id")
@@ -217,7 +237,6 @@ local returns = table.freeze({
 	CreateHint = table.freeze({
 		Fire = function(Player: Player, Value: ({
 			Hint: (string),
-			Option: ((string)?),
 		}))
 			load_empty()
 			alloc(1)
@@ -228,26 +247,12 @@ local returns = table.freeze({
 			buffer.writeu16(outgoing_buff, outgoing_apos, len_1)
 			alloc(len_1)
 			buffer.writestring(outgoing_buff, outgoing_apos, Value.Hint, len_1)
-			if Value.Option == nil then
-				alloc(1)
-				buffer.writeu8(outgoing_buff, outgoing_apos, 0)
-			else
-				alloc(1)
-				buffer.writeu8(outgoing_buff, outgoing_apos, 1)
-				local len_2 = #Value.Option
-				assert(len_2 <= 10)
-				alloc(2)
-				buffer.writeu16(outgoing_buff, outgoing_apos, len_2)
-				alloc(len_2)
-				buffer.writestring(outgoing_buff, outgoing_apos, Value.Option, len_2)
-			end
 			local buff = buffer.create(outgoing_used)
 			buffer.copy(buff, 0, outgoing_buff, 0, outgoing_used)
 			unreliable:FireClient(Player, buff, outgoing_inst)
 		end,
 		FireAll = function(Value: ({
 			Hint: (string),
-			Option: ((string)?),
 		}))
 			load_empty()
 			alloc(1)
@@ -258,26 +263,12 @@ local returns = table.freeze({
 			buffer.writeu16(outgoing_buff, outgoing_apos, len_1)
 			alloc(len_1)
 			buffer.writestring(outgoing_buff, outgoing_apos, Value.Hint, len_1)
-			if Value.Option == nil then
-				alloc(1)
-				buffer.writeu8(outgoing_buff, outgoing_apos, 0)
-			else
-				alloc(1)
-				buffer.writeu8(outgoing_buff, outgoing_apos, 1)
-				local len_2 = #Value.Option
-				assert(len_2 <= 10)
-				alloc(2)
-				buffer.writeu16(outgoing_buff, outgoing_apos, len_2)
-				alloc(len_2)
-				buffer.writestring(outgoing_buff, outgoing_apos, Value.Option, len_2)
-			end
 			local buff = buffer.create(outgoing_used)
 			buffer.copy(buff, 0, outgoing_buff, 0, outgoing_used)
 			unreliable:FireAllClients(buff, outgoing_inst)
 		end,
 		FireExcept = function(Except: Player, Value: ({
 			Hint: (string),
-			Option: ((string)?),
 		}))
 			load_empty()
 			alloc(1)
@@ -288,19 +279,6 @@ local returns = table.freeze({
 			buffer.writeu16(outgoing_buff, outgoing_apos, len_1)
 			alloc(len_1)
 			buffer.writestring(outgoing_buff, outgoing_apos, Value.Hint, len_1)
-			if Value.Option == nil then
-				alloc(1)
-				buffer.writeu8(outgoing_buff, outgoing_apos, 0)
-			else
-				alloc(1)
-				buffer.writeu8(outgoing_buff, outgoing_apos, 1)
-				local len_2 = #Value.Option
-				assert(len_2 <= 10)
-				alloc(2)
-				buffer.writeu16(outgoing_buff, outgoing_apos, len_2)
-				alloc(len_2)
-				buffer.writestring(outgoing_buff, outgoing_apos, Value.Option, len_2)
-			end
 			local buff = buffer.create(outgoing_used)
 			buffer.copy(buff, 0, outgoing_buff, 0, outgoing_used)
 			for _, player in Players:GetPlayers() do
@@ -311,7 +289,6 @@ local returns = table.freeze({
 		end,
 		FireList = function(List: { Player }, Value: ({
 			Hint: (string),
-			Option: ((string)?),
 		}))
 			load_empty()
 			alloc(1)
@@ -322,19 +299,6 @@ local returns = table.freeze({
 			buffer.writeu16(outgoing_buff, outgoing_apos, len_1)
 			alloc(len_1)
 			buffer.writestring(outgoing_buff, outgoing_apos, Value.Hint, len_1)
-			if Value.Option == nil then
-				alloc(1)
-				buffer.writeu8(outgoing_buff, outgoing_apos, 0)
-			else
-				alloc(1)
-				buffer.writeu8(outgoing_buff, outgoing_apos, 1)
-				local len_2 = #Value.Option
-				assert(len_2 <= 10)
-				alloc(2)
-				buffer.writeu16(outgoing_buff, outgoing_apos, len_2)
-				alloc(len_2)
-				buffer.writestring(outgoing_buff, outgoing_apos, Value.Option, len_2)
-			end
 			local buff = buffer.create(outgoing_used)
 			buffer.copy(buff, 0, outgoing_buff, 0, outgoing_used)
 			for _, player in List do
@@ -343,7 +307,6 @@ local returns = table.freeze({
 		end,
 		FireSet = function(Set: { [Player]: true }, Value: ({
 			Hint: (string),
-			Option: ((string)?),
 		}))
 			load_empty()
 			alloc(1)
@@ -354,19 +317,111 @@ local returns = table.freeze({
 			buffer.writeu16(outgoing_buff, outgoing_apos, len_1)
 			alloc(len_1)
 			buffer.writestring(outgoing_buff, outgoing_apos, Value.Hint, len_1)
-			if Value.Option == nil then
-				alloc(1)
-				buffer.writeu8(outgoing_buff, outgoing_apos, 0)
-			else
-				alloc(1)
-				buffer.writeu8(outgoing_buff, outgoing_apos, 1)
-				local len_2 = #Value.Option
-				assert(len_2 <= 10)
-				alloc(2)
-				buffer.writeu16(outgoing_buff, outgoing_apos, len_2)
-				alloc(len_2)
-				buffer.writestring(outgoing_buff, outgoing_apos, Value.Option, len_2)
+			local buff = buffer.create(outgoing_used)
+			buffer.copy(buff, 0, outgoing_buff, 0, outgoing_used)
+			for player in Set do
+				unreliable:FireClient(player, buff, outgoing_inst)
 			end
+		end,
+	}),
+	CreateFullScreenHint = table.freeze({
+		Fire = function(Player: Player, Value: ({
+			Hint: (string),
+			State: (boolean),
+		}))
+			load_empty()
+			alloc(1)
+			buffer.writeu8(outgoing_buff, outgoing_apos, 2)
+			local len_1 = #Value.Hint
+			assert(len_1 <= 666)
+			alloc(2)
+			buffer.writeu16(outgoing_buff, outgoing_apos, len_1)
+			alloc(len_1)
+			buffer.writestring(outgoing_buff, outgoing_apos, Value.Hint, len_1)
+			alloc(1)
+			buffer.writeu8(outgoing_buff, outgoing_apos, Value.State and 1 or 0)
+			local buff = buffer.create(outgoing_used)
+			buffer.copy(buff, 0, outgoing_buff, 0, outgoing_used)
+			unreliable:FireClient(Player, buff, outgoing_inst)
+		end,
+		FireAll = function(Value: ({
+			Hint: (string),
+			State: (boolean),
+		}))
+			load_empty()
+			alloc(1)
+			buffer.writeu8(outgoing_buff, outgoing_apos, 2)
+			local len_1 = #Value.Hint
+			assert(len_1 <= 666)
+			alloc(2)
+			buffer.writeu16(outgoing_buff, outgoing_apos, len_1)
+			alloc(len_1)
+			buffer.writestring(outgoing_buff, outgoing_apos, Value.Hint, len_1)
+			alloc(1)
+			buffer.writeu8(outgoing_buff, outgoing_apos, Value.State and 1 or 0)
+			local buff = buffer.create(outgoing_used)
+			buffer.copy(buff, 0, outgoing_buff, 0, outgoing_used)
+			unreliable:FireAllClients(buff, outgoing_inst)
+		end,
+		FireExcept = function(Except: Player, Value: ({
+			Hint: (string),
+			State: (boolean),
+		}))
+			load_empty()
+			alloc(1)
+			buffer.writeu8(outgoing_buff, outgoing_apos, 2)
+			local len_1 = #Value.Hint
+			assert(len_1 <= 666)
+			alloc(2)
+			buffer.writeu16(outgoing_buff, outgoing_apos, len_1)
+			alloc(len_1)
+			buffer.writestring(outgoing_buff, outgoing_apos, Value.Hint, len_1)
+			alloc(1)
+			buffer.writeu8(outgoing_buff, outgoing_apos, Value.State and 1 or 0)
+			local buff = buffer.create(outgoing_used)
+			buffer.copy(buff, 0, outgoing_buff, 0, outgoing_used)
+			for _, player in Players:GetPlayers() do
+				if player ~= Except then
+					unreliable:FireClient(player, buff, outgoing_inst)
+				end
+			end
+		end,
+		FireList = function(List: { Player }, Value: ({
+			Hint: (string),
+			State: (boolean),
+		}))
+			load_empty()
+			alloc(1)
+			buffer.writeu8(outgoing_buff, outgoing_apos, 2)
+			local len_1 = #Value.Hint
+			assert(len_1 <= 666)
+			alloc(2)
+			buffer.writeu16(outgoing_buff, outgoing_apos, len_1)
+			alloc(len_1)
+			buffer.writestring(outgoing_buff, outgoing_apos, Value.Hint, len_1)
+			alloc(1)
+			buffer.writeu8(outgoing_buff, outgoing_apos, Value.State and 1 or 0)
+			local buff = buffer.create(outgoing_used)
+			buffer.copy(buff, 0, outgoing_buff, 0, outgoing_used)
+			for _, player in List do
+				unreliable:FireClient(player, buff, outgoing_inst)
+			end
+		end,
+		FireSet = function(Set: { [Player]: true }, Value: ({
+			Hint: (string),
+			State: (boolean),
+		}))
+			load_empty()
+			alloc(1)
+			buffer.writeu8(outgoing_buff, outgoing_apos, 2)
+			local len_1 = #Value.Hint
+			assert(len_1 <= 666)
+			alloc(2)
+			buffer.writeu16(outgoing_buff, outgoing_apos, len_1)
+			alloc(len_1)
+			buffer.writestring(outgoing_buff, outgoing_apos, Value.Hint, len_1)
+			alloc(1)
+			buffer.writeu8(outgoing_buff, outgoing_apos, Value.State and 1 or 0)
 			local buff = buffer.create(outgoing_used)
 			buffer.copy(buff, 0, outgoing_buff, 0, outgoing_used)
 			for player in Set do
@@ -379,14 +434,14 @@ local returns = table.freeze({
 		}))
 			load_player(Player)
 			alloc(1)
-			buffer.writeu8(outgoing_buff, outgoing_apos, 3)
+			buffer.writeu8(outgoing_buff, outgoing_apos, 5)
 			player_map[Player] = save()
 		end,
 		FireAll = function(Value: ({
 		}))
 			load_empty()
 			alloc(1)
-			buffer.writeu8(outgoing_buff, outgoing_apos, 3)
+			buffer.writeu8(outgoing_buff, outgoing_apos, 5)
 			local buff, used, inst = outgoing_buff, outgoing_used, outgoing_inst
 			for _, player in Players:GetPlayers() do
 				load_player(player)
@@ -400,7 +455,7 @@ local returns = table.freeze({
 		}))
 			load_empty()
 			alloc(1)
-			buffer.writeu8(outgoing_buff, outgoing_apos, 3)
+			buffer.writeu8(outgoing_buff, outgoing_apos, 5)
 			local buff, used, inst = outgoing_buff, outgoing_used, outgoing_inst
 			for _, player in Players:GetPlayers() do
 				if player ~= Except then
@@ -416,7 +471,7 @@ local returns = table.freeze({
 		}))
 			load_empty()
 			alloc(1)
-			buffer.writeu8(outgoing_buff, outgoing_apos, 3)
+			buffer.writeu8(outgoing_buff, outgoing_apos, 5)
 			local buff, used, inst = outgoing_buff, outgoing_used, outgoing_inst
 			for _, player in List do
 				load_player(player)
@@ -430,7 +485,7 @@ local returns = table.freeze({
 		}))
 			load_empty()
 			alloc(1)
-			buffer.writeu8(outgoing_buff, outgoing_apos, 3)
+			buffer.writeu8(outgoing_buff, outgoing_apos, 5)
 			local buff, used, inst = outgoing_buff, outgoing_used, outgoing_inst
 			for player in Set do
 				load_player(player)
@@ -445,21 +500,30 @@ local returns = table.freeze({
 		SetCallback = function(Callback: (Player, ({
 			SlotChosen: (string),
 		})) -> ()): () -> ()
-			events[2] = Callback
+			events[3] = Callback
 			return function()
-				events[2] = nil
+				events[3] = nil
+			end
+		end,
+	}),
+	DataTransfer = table.freeze({
+		SetCallback = function(Callback: (Player, ({
+		})) -> ()): () -> ()
+			events[4] = Callback
+			return function()
+				events[4] = nil
 			end
 		end,
 	}),
 	TeleportPrompt = table.freeze({
 		SetCallback = function(Callback: (Player, ({
 			Option: (string),
-			PrivateCode: (string),
+			PrivateCode: ((unknown)),
 			SlotChosen: (string),
 		})) -> ()): () -> ()
-			events[4] = Callback
+			events[6] = Callback
 			return function()
-				events[4] = nil
+				events[6] = nil
 			end
 		end,
 	}),

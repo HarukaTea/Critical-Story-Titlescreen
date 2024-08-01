@@ -1,5 +1,6 @@
 --!nocheck
 
+local ContextActionService = game:GetService("ContextActionService")
 local RepS = game:GetService("ReplicatedStorage")
 local RS = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -8,7 +9,9 @@ local AssetBook = require(RepS.Modules.Data.AssetBook)
 local Components = require(RepS.Modules.UI.Vanilla)
 local Events = require(RepS.Modules.Data.Events)
 local Fusion = require(RepS.Modules.Packages.Fusion)
+local HarukaLib = require(RepS.Modules.Packages.HarukaLib)
 local Spawn = require(RepS.Modules.Packages.Spawn)
+local Signals = require(RepS.Modules.Data.Signals)
 
 local Children, New, Tween, Computed = Fusion.Children, Fusion.New, Fusion.Tween, Fusion.Computed
 
@@ -21,7 +24,6 @@ local SaveSlot = require(RepS.Modules.UI.Components.SaveSlot)
 
 local TitleScreen = {}
 TitleScreen.__index = TitleScreen
-TitleScreen.__type = "TitleScreen"
 
 local wait = task.wait
 local v2New = Vector2.new
@@ -41,6 +43,8 @@ return function(plr: Player)
 	TitleScreenPinia(self)
 
 	local scope = self.scope :: table
+	local isSelecting = Fusion.Value(scope, false)
+
 	Components.ScreenGui(scope, {
 		Name = "Titlescreen",
 		ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets,
@@ -60,13 +64,12 @@ return function(plr: Player)
 				end),
 
 				[Children] = {
-					New(scope, "UIAspectRatioConstraint")({ AspectRatio = 25.129 }),
+					New(scope, "UIAspectRatioConstraint")({ AspectRatio = 25.627 }),
 
 					BtnsFrame(self),
 
-					Components.TextLabel(scope, {
+					Components.Frame(scope, {
 						Name = "TipBG",
-						AnchorPoint = v2New(0.5, 0.5),
 						Position = fromScale(0.5, 0),
 						Size = fromScale(0.5, 0.5),
 						BackgroundTransparency = 0,
@@ -113,6 +116,55 @@ return function(plr: Player)
 							}),
 						},
 					}),
+					Components.TextButton(scope, {
+						Name = "DataTransferBtn",
+						Position = fromScale(0.02, -0.537),
+						Size = fromScale(0.185, 0.592),
+						Text = "DATA TRANSFER",
+
+						Visible = Computed(scope, function(use: Fusion.Use)
+							return use(self.backBtnVisible)
+						end),
+
+						[Fusion.OnEvent("MouseEnter")] = function()
+							isSelecting:set(true)
+						end,
+						[Fusion.OnEvent("MouseLeave")] = function()
+							isSelecting:set(false)
+						end,
+						[Fusion.OnEvent("MouseButton1Click")] = function()
+							workspace.Sounds.SFXs.Click:Play()
+
+							local action = HarukaLib:CreateConfirmPrompt(
+								plr,
+								[[<yellow>NOTE:</font> This will teleport you to the legacy game, AND you <yellow>CAN ONLY TRANSFER</font> your play time, doing so will <yellow>OVERRIDE</font> your current one.]]
+							):Wait()
+
+							if action == "Confirmed" then
+								self.isTeleporting:set(true)
+
+								Signals.CreateFullScreenHint:Fire("TELEPORTING TO LEGACY PLACE...", true)
+
+								Events.DataTransfer.Fire({})
+							end
+						end,
+
+						[Children] = {
+							Components.RoundUICorner(scope),
+							Components.UIStroke(scope, {
+								Thickness = 3,
+								Enabled = true,
+
+								Transparency = Tween(scope, Computed(scope, function(use: Fusion.Use)
+									return if use(isSelecting) then 0.3 else 1
+								end), AssetBook.TweenInfos.twiceHalf)
+							}),
+							Fusion.New(scope, "UIPadding")({
+								PaddingBottom = UDim.new(0.07, 0),
+								PaddingTop = UDim.new(0.07, 0),
+							})
+						}
+					}),
 
 					Components.TextLabel(scope, {
 						Name = "MapCredits",
@@ -138,37 +190,17 @@ return function(plr: Player)
 				Position = fromScale(0.5, 0.5),
 
 				[Children] = {
-					New(scope, "UIAspectRatioConstraint")({ AspectRatio = 25.129 }),
+					New(scope, "UIAspectRatioConstraint")({ AspectRatio = 25.627 }),
 
-					Components.TextLabel(scope, {
-						Name = "Hint",
-						AnchorPoint = v2New(0.5, 0.5),
-						Position = fromScale(0.5, 0.5),
-						Size = fromScale(1, 0.6),
-						Text = "Travelling to Critical Worlds...",
-						TextColor3 = Color3.fromRGB(),
-
-						Visible = Computed(scope, function(use)
-							return use(self.isTeleporting)
-						end),
-
-						[Children] = {
-							New(scope, "UITextSizeConstraint")({ MaxTextSize = 36 }),
-						},
-					}),
 					Components.Frame(scope, {
 						Name = "SaveSlotsFrame",
 
-						Visible = Computed(scope, function(use)
+						Visible = Computed(scope, function(use: Fusion.Use)
 							return not use(self.isTeleporting)
 						end),
-						Position = Tween(
-							scope,
-							Computed(scope, function(use)
-								return use(self.saveSlotBGPos)
-							end),
-							AssetBook.TweenInfos.oneHalf
-						),
+						Position = Tween(scope, Computed(scope, function(use)
+							return use(self.saveSlotBGPos)
+						end), AssetBook.TweenInfos.oneHalf),
 
 						[Children] = {
 							SaveSlot(1, self),
@@ -179,16 +211,6 @@ return function(plr: Player)
 
 					FriendListFrame(self),
 				},
-			}),
-
-			Components.Frame(scope, {
-				Name = "TeleportingFrame",
-				BackgroundColor3 = Color3.fromRGB(223, 223, 223),
-				ZIndex = 0,
-
-				BackgroundTransparency = Tween(scope, Computed(scope, function(use: Fusion.Use)
-					return if use(self.isTeleporting) then 0 else 1
-				end), AssetBook.TweenInfos.twiceHalf)
 			})
 		},
 	})
@@ -196,8 +218,34 @@ return function(plr: Player)
 	--// Connections
 	local function teleportFailed()
 		self.isTeleporting:set(false)
+
+		Signals.CreateFullScreenHint:Fire("...", false)
 	end
 	table.insert(scope, Events.TeleportFailed.On(teleportFailed))
+
+	pcall(function()
+		local listeners = {}
+		for i = 1, 3 do
+			listeners["Attr-DATA"..i.."Class"] = function(class: string)
+				self.playerData["Slot"..i].Class:set(class)
+			end
+			listeners["Attr-DATA"..i.."PlayTime"] = function(playTime: number)
+				self.playerData["Slot"..i].PlayTime:set(playTime)
+			end
+			listeners["Attr-DATA"..i.."Levels"] = function(levels: number)
+				self.playerData["Slot"..i].Levels:set(levels)
+			end
+			listeners["Attr-DATA"..i.."LastSeenLocation"] = function(lastSeen: string)
+				self.playerData["Slot"..i].LastSeen:set(lastSeen)
+			end
+			listeners["Attr-DATA"..i.."StoryId"] = function(storyId: number)
+				self.playerData["Slot"..i].StoryId:set(storyId)
+			end
+		end
+
+		table.insert(scope, HarukaLib:Hydrate(plr, listeners))
+	end)
+
 
 	--// Clear
 	local function _onDead()
@@ -206,24 +254,33 @@ return function(plr: Player)
 	self.char.Humanoid.Died:Once(_onDead)
 
 	--// Setups
-	UserInputService.ModalEnabled = true
+	pcall(function()
+		UserInputService.ModalEnabled = true
+
+        ContextActionService:BindActionAtPriority("FreezeControl", function()
+            return Enum.ContextActionResult.Sink
+        end, false, Enum.ContextActionPriority.High.Value, unpack(Enum.PlayerActions:GetEnumItems()))
+	end)
 
 	wait(0.5)
 	self.bottomFramePos:set(fromScale(0.5, 1))
 
 	Spawn(function()
+		workspace:WaitForChild("MapComponents", 999) --- low-end devices...
+		workspace.MapComponents:WaitForChild("PlayerChars", 999)
+
 		for i = 1, 3 do
 			local charSelfViewSlot = Fusion.peek(self.charSelfViews[i]) :: ViewportFrame
 			charSelfViewSlot.CurrentCamera = charSelfViewSlot:FindFirstChildOfClass("Camera")
 
-			workspace.MapComponents.PlayerChars:WaitForChild(self.plr.Name, 999):WaitForChild("Slot" .. i, 999)
+			workspace.MapComponents.PlayerChars:WaitForChild(self.plr.Name, 999):WaitForChild("Slot"..i, 999)
 
 			table.insert(scope, RS.Heartbeat:Connect(function()
 				if charSelfViewSlot:FindFirstChildOfClass("Model") then charSelfViewSlot:FindFirstChildOfClass("Model"):Destroy() end
 				if not workspace.MapComponents.PlayerChars:FindFirstChild(self.plr.Name) then return end
 				if not workspace.MapComponents.PlayerChars[self.plr.Name]:FindFirstChild("Slot" .. i) then return end
 
-				local clonedChar = workspace.MapComponents.PlayerChars[self.plr.Name]["Slot" .. i]:Clone() :: Model
+				local clonedChar = workspace.MapComponents.PlayerChars[self.plr.Name]["Slot"..i]:Clone() :: Model
 				local hrp = clonedChar.PrimaryPart
 				if not hrp then return end
 

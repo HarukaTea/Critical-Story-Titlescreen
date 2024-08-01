@@ -17,6 +17,16 @@ local udNew = UDim.new
 local fromRGB = Color3.fromRGB
 local upper = string.upper
 
+
+local function _checkIsInCS(placeId: number) : boolean
+    local found = false
+    for _, world: number in AssetBook.WorldInfo do
+        if placeId == world then found = true break end
+    end
+
+    return found
+end
+
 local function FriendList(self: table) : Frame
     local scope = self.scope :: table
 
@@ -49,20 +59,22 @@ local function FriendList(self: table) : Frame
             }),
 
             Fusion.ForValues(scope, self.friends, function(_, localScope: table, info: table)
-                local found = false
-                for _, world in AssetBook.WorldInfo do
-                    if info.PlaceId == world then found = true break end
+                local found = _checkIsInCS(info.PlaceId)
+
+                if found then
+                    info.IsInCS = true
+                    return FriendSlot(info, self, localScope)
                 end
-                if found then return FriendSlot(info, self, localScope) end
 
                 return nil
             end),
             Fusion.ForValues(scope, self.friends, function(_, localScope: table, info: table)
-                local found = false
-                for _, world in AssetBook.WorldInfo do
-                    if info.PlaceId == world then found = true break end
+                local found = _checkIsInCS(info.PlaceId)
+
+                if not found then
+                    info.IsInCS = false
+                    return FriendSlot(info, self, localScope)
                 end
-                if not found then return FriendSlot(info, self, localScope) end
 
                 return nil
             end),

@@ -17,8 +17,20 @@ local function TitleScreenPinia(self: table)
 
     self.currentUI = Value("Title")
     self.clickTipVisible = Value(true)
-
     self.backBtnVisible = Value(false)
+
+    self.playerData = {
+        Slot1 = {},
+        Slot2 = {},
+        Slot3 = {}
+    }
+    for i = 1, 3 do
+        self.playerData["Slot"..i].Class = Value("Warrior")
+        self.playerData["Slot"..i].PlayTime = Value(0)
+        self.playerData["Slot"..i].Levels = Value(1)
+        self.playerData["Slot"..i].StoryId = Value(1)
+        self.playerData["Slot"..i].LastSeen = Value("")
+    end
 
     self.saveSlotBGPos = Value(fromScale(-0.5, -0.7))
     self.charSelfViews = { Value(), Value(), Value() }

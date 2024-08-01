@@ -55,7 +55,7 @@ local function setup()
     bG.Parent = loadingScreen
     loadingScreen.Parent = plr.PlayerGui
 
-    task.delay(9, function()
+    task.delay(10, function()
         if loadFinished then return end
 
         loadingTip.Text = "ADVENTURE IS TAKING LONGER TO LOAD..."
@@ -64,6 +64,11 @@ local function setup()
         if loadFinished then return end
 
         loadingTip.Text = "ADVENTURE IS STILL LOADING..."
+    end)
+    task.delay(30, function()
+        if loadFinished then return end
+
+        plr:Kick("Loading took too long, maybe try again later?")
     end)
 
     --- wait until data loads

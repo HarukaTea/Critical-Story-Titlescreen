@@ -109,7 +109,13 @@ if not RunService:IsRunning() then
 		CreateHint = table.freeze({
 			On = noop
 		}),
+		CreateFullScreenHint = table.freeze({
+			On = noop
+		}),
 		DataWipe = table.freeze({
+			Fire = noop
+		}),
+		DataTransfer = table.freeze({
 			Fire = noop
 		}),
 		TeleportFailed = table.freeze({
@@ -146,12 +152,14 @@ end
 
 RunService.Heartbeat:Connect(SendEvents)
 
-local events = table.create(4)
-local event_queue: { [number]: { any } } = table.create(4)
+local events = table.create(6)
+local event_queue: { [number]: { any } } = table.create(6)
 events[1] = {}
 event_queue[1] = {}
-events[3] = {}
-event_queue[3] = {}
+events[2] = {}
+event_queue[2] = {}
+events[5] = {}
+event_queue[5] = {}
 reliable.OnClientEvent:Connect(function(buff, inst)
 	incoming_buff = buff
 	incoming_inst = inst
@@ -160,17 +168,17 @@ reliable.OnClientEvent:Connect(function(buff, inst)
 	local len = buffer.len(buff)
 	while incoming_read < len do
 		local id = buffer.readu8(buff, read(1))
-		if id == 3 then
+		if id == 5 then
 			local value
 			value = {}
-			if events[3][1] then
-				for _, cb in events[3] do
+			if events[5][1] then
+				for _, cb in events[5] do
 					task.spawn(cb, value)
 				end
 			else
-				table.insert(event_queue[3], value)
-				if #event_queue[3] > 64 then
-					warn(`[ZAP] {#event_queue[3]} events in queue for TeleportFailed. Did you forget to attach a listener?`)
+				table.insert(event_queue[5], value)
+				if #event_queue[5] > 64 then
+					warn(`[ZAP] {#event_queue[5]} events in queue for TeleportFailed. Did you forget to attach a listener?`)
 				end
 			end
 		else
@@ -190,13 +198,6 @@ unreliable.OnClientEvent:Connect(function(buff, inst)
 		local len_1 = buffer.readu16(incoming_buff, read(2))
 		assert(len_1 <= 666)
 		value.Hint = buffer.readstring(incoming_buff, read(len_1), len_1)
-		if buffer.readu8(incoming_buff, read(1)) == 1 then
-			local len_2 = buffer.readu16(incoming_buff, read(2))
-			assert(len_2 <= 10)
-			value.Option = buffer.readstring(incoming_buff, read(len_2), len_2)
-		else
-			value.Option = nil
-		end
 		if events[1][1] then
 			for _, cb in events[1] do
 				task.spawn(cb, value)
@@ -205,6 +206,23 @@ unreliable.OnClientEvent:Connect(function(buff, inst)
 			table.insert(event_queue[1], value)
 			if #event_queue[1] > 64 then
 				warn(`[ZAP] {#event_queue[1]} events in queue for CreateHint. Did you forget to attach a listener?`)
+			end
+		end
+	elseif id == 2 then
+		local value
+		value = {}
+		local len_1 = buffer.readu16(incoming_buff, read(2))
+		assert(len_1 <= 666)
+		value.Hint = buffer.readstring(incoming_buff, read(len_1), len_1)
+		value.State = buffer.readu8(incoming_buff, read(1)) == 1
+		if events[2][1] then
+			for _, cb in events[2] do
+				task.spawn(cb, value)
+			end
+		else
+			table.insert(event_queue[2], value)
+			if #event_queue[2] > 64 then
+				warn(`[ZAP] {#event_queue[2]} events in queue for CreateFullScreenHint. Did you forget to attach a listener?`)
 			end
 		end
 	else
@@ -218,7 +236,7 @@ local returns = table.freeze({
 			SlotChosen: (string),
 		}))
 			alloc(1)
-			buffer.writeu8(outgoing_buff, outgoing_apos, 2)
+			buffer.writeu8(outgoing_buff, outgoing_apos, 3)
 			local len_1 = #Value.SlotChosen
 			alloc(2)
 			buffer.writeu16(outgoing_buff, outgoing_apos, len_1)
@@ -226,35 +244,44 @@ local returns = table.freeze({
 			buffer.writestring(outgoing_buff, outgoing_apos, Value.SlotChosen, len_1)
 		end,
 	}),
-	TeleportPrompt = table.freeze({
+	DataTransfer = table.freeze({
 		Fire = function(Value: ({
-			Option: (string),
-			PrivateCode: (string),
-			SlotChosen: (string),
 		}))
 			alloc(1)
 			buffer.writeu8(outgoing_buff, outgoing_apos, 4)
+		end,
+	}),
+	TeleportPrompt = table.freeze({
+		Fire = function(Value: ({
+			Option: (string),
+			PrivateCode: ((unknown)),
+			SlotChosen: (string),
+		}))
+			alloc(1)
+			buffer.writeu8(outgoing_buff, outgoing_apos, 6)
 			local len_1 = #Value.Option
 			alloc(2)
 			buffer.writeu16(outgoing_buff, outgoing_apos, len_1)
 			alloc(len_1)
 			buffer.writestring(outgoing_buff, outgoing_apos, Value.Option, len_1)
-			local len_2 = #Value.PrivateCode
+			if Value.PrivateCode == nil then
+				alloc(1)
+				buffer.writeu8(outgoing_buff, outgoing_apos, 0)
+			else
+				alloc(1)
+				buffer.writeu8(outgoing_buff, outgoing_apos, 1)
+				table.insert(outgoing_inst, Value.PrivateCode)
+			end
+			local len_2 = #Value.SlotChosen
 			alloc(2)
 			buffer.writeu16(outgoing_buff, outgoing_apos, len_2)
 			alloc(len_2)
-			buffer.writestring(outgoing_buff, outgoing_apos, Value.PrivateCode, len_2)
-			local len_3 = #Value.SlotChosen
-			alloc(2)
-			buffer.writeu16(outgoing_buff, outgoing_apos, len_3)
-			alloc(len_3)
-			buffer.writestring(outgoing_buff, outgoing_apos, Value.SlotChosen, len_3)
+			buffer.writestring(outgoing_buff, outgoing_apos, Value.SlotChosen, len_2)
 		end,
 	}),
 	CreateHint = table.freeze({
 		On = function(Callback: (({
 			Hint: (string),
-			Option: ((string)?),
 		})) -> ())
 			table.insert(events[1], Callback)
 			for _, value in event_queue[1] do
@@ -266,16 +293,31 @@ local returns = table.freeze({
 			end
 		end,
 	}),
+	CreateFullScreenHint = table.freeze({
+		On = function(Callback: (({
+			Hint: (string),
+			State: (boolean),
+		})) -> ())
+			table.insert(events[2], Callback)
+			for _, value in event_queue[2] do
+				task.spawn(Callback, value)
+			end
+			event_queue[2] = {}
+			return function()
+				table.remove(events[2], table.find(events[2], Callback))
+			end
+		end,
+	}),
 	TeleportFailed = table.freeze({
 		On = function(Callback: (({
 		})) -> ())
-			table.insert(events[3], Callback)
-			for _, value in event_queue[3] do
+			table.insert(events[5], Callback)
+			for _, value in event_queue[5] do
 				task.spawn(Callback, value)
 			end
-			event_queue[3] = {}
+			event_queue[5] = {}
 			return function()
-				table.remove(events[3], table.find(events[3], Callback))
+				table.remove(events[5], table.find(events[5], Callback))
 			end
 		end,
 	}),

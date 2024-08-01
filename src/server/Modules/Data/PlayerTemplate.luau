@@ -2,8 +2,6 @@
 
 local slotStats = {
 	Slot1 = {
-		DataTransferedV3 = false,
-
 		Stats = {
 			Levels = 1,
 			EXP = 0,
@@ -12,6 +10,7 @@ local slotStats = {
 			PlayTime = 0,
 
 			Class = "Warrior",
+			Cosmetic = "None",
 			LastSeenLocation = "MonolithVillage",
 			LastSeenWorld = "Mainworld",
 
@@ -29,18 +28,10 @@ local slotStats = {
 			Town = {}
 		},
 
-		Settings = {
-			Musics = true,
-			SFXs = true,
-			PotatoMode = false,
-			PlayerList = true,
-			MapDetails = true,
-			CombatMode = "Solo",
-			MapShadows = true
-		},
-
 		Inventory = {},
-		ClassUnlocks = { "Warrior" }
+		ClassUnlocks = {
+			Warrior = true
+		}
 	}
 }
 slotStats.Slot2 = slotStats.Slot1

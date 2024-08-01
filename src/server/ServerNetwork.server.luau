@@ -24,10 +24,10 @@ Events.TeleportPrompt.SetCallback(function(plr, data)
 			local slotChosen = tonumber(string.match(dataChosen, "%d"))
 			local lastSeenWorld = plr:GetAttribute("DATA"..slotChosen.."LastSeenWorld") :: string
 
-			TeleportService:TeleportAsync(WORLDS.Mainworld, { plr }, teleportOptions)
+			TeleportService:TeleportAsync(lastSeenWorld, { plr }, teleportOptions)
 
-		end):Catch(function(err)
-			warn("[Public Teleport]: "..err)
+		end):catch(function(err)
+			warn(`[Public Teleport]: {err}`)
 
 			TeleportService:TeleportAsync(WORLDS.Mainworld, { plr }, teleportOptions)
 		end)
@@ -42,11 +42,11 @@ Events.TeleportPrompt.SetCallback(function(plr, data)
 
 			TeleportService:TeleportAsync(WORLDS.Mainworld, { plr }, teleportOptions)
 
-		end):Catch(function(err)
+		end):catch(function(err)
 			Events.TeleportFailed.Fire(plr, {})
 			Events.CreateHint.Fire(plr, { Hint = "Error occurred when creating private server!" })
 
-			warn("[Private Create]: "..err)
+			warn(`[Private Teleport]: {err}`)
 			return
 		end)
 
@@ -107,8 +107,13 @@ Events.TeleportPrompt.SetCallback(function(plr, data)
 end)
 
 
-local function teleportFailed(plr: Player)
+Events.DataTransfer.SetCallback(function(plr: Player)
+	task.wait(1)
+	TeleportService:Teleport(7523159032, plr)
+end)
+
+
+TeleportService.TeleportInitFailed:Connect(function(plr: Player)
 	Events.TeleportFailed.Fire(plr, {})
 	Events.CreateHint.Fire(plr, { Hint = "Teleport failed!" })
-end
-TeleportService.TeleportInitFailed:Connect(teleportFailed)
+end)

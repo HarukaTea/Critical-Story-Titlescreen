@@ -1,11 +1,12 @@
 {
     "robloxLsp.workspace.ignoreDir": [
         ".vscode",
-        "**/_Index/**",
-
-        "src/modules/Packages/Warp/Util/Buffer.luau"
+        "**/_Index/**"
     ],
-    "robloxLsp.diagnostics.disable": ["undefined-type", "redefined-type"],
+    "robloxLsp.diagnostics.disable": [
+        "undefined-type",
+        "redefined-type"
+    ],
 
     "files.exclude": {
         "**/.git": true,

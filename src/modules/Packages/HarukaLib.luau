@@ -1,16 +1,20 @@
 --!nocheck
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RepS = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
-local Signal = require(ReplicatedStorage.Modules.Packages.Signal)
-local Spawn = require(ReplicatedStorage.Modules.Packages.Spawn)
+local Components = require(RepS.Modules.UI.Vanilla)
+
+local AssetBook = require(RepS.Modules.Data.AssetBook)
+local Fusion = require(RepS.Modules.Packages.Fusion)
+local Signal = require(RepS.Modules.Packages.Signal)
+local Spawn = require(RepS.Modules.Packages.Spawn)
+
+local Children = Fusion.Children
 
 local HarukaLib = {}
 
---[[
-	A simple serializer for datastore
-]]
+
 function HarukaLib:Deserialize(val: table) : any
 	if typeof(val) ~= "table" then return val end
 
@@ -30,9 +34,37 @@ function HarukaLib:Deserialize(val: table) : any
 	end
 end
 
---[[
-	A custom remade of `Bin`
-]]
+
+function HarukaLib:Hydrate(obj: Instance, props: table)
+	local Add, Empty = HarukaLib.Bin()
+
+	for prop, func in props do
+		if string.find(prop, "Attr") then
+			local _, endPos = string.find(prop, "Attr")
+			local attr = string.sub(prop, endPos + 2)
+
+			func(obj:GetAttribute(attr))
+
+			Add(obj:GetAttributeChangedSignal(attr):Connect(function()
+				func(obj:GetAttribute(attr))
+			end))
+
+		elseif string.find(prop, "Prop") then
+			local _, endPos = string.find(prop, "Prop")
+			local propName = string.sub(prop, endPos + 2)
+
+			func(obj[propName])
+
+			Add(obj:GetPropertyChangedSignal(propName):Connect(function()
+				func(obj[propName])
+			end))
+		end
+	end
+
+	return Empty
+end
+
+
 function HarukaLib.Bin()
 	local bin = {}
 
@@ -61,12 +93,10 @@ function HarukaLib.Bin()
 	end
 end
 
---[[
-	Play a cutscene camera using bezier curve
-]]
+
 function HarukaLib:PlayCutscene(pointsFolder: Folder | Model, duration: number)
 	local camera = workspace.CurrentCamera
-	local signal = Signal()
+	local signal = Signal.new()
 
 	--// Private
 	local function _getCF(points: table, t: number) : CFrame
@@ -99,12 +129,11 @@ function HarukaLib:PlayCutscene(pointsFolder: Folder | Model, duration: number)
 	local start = os.clock()
 	local passedTime = 0
 
-	local ok, _ = pcall(function()
+	pcall(function()
 		RunService:BindToRenderStep("HarukaCutscene", priority, function()
 			passedTime = os.clock() - start
 
 			if passedTime <= duration then
-				camera.CameraType = Enum.CameraType.Scriptable
 				camera.CFrame = _getCF(points, passedTime / duration)
 			else
 				RunService:UnbindFromRenderStep("HarukaCutscene")
@@ -114,15 +143,157 @@ function HarukaLib:PlayCutscene(pointsFolder: Folder | Model, duration: number)
 			end
 		end)
 	end)
-	if not ok then
-		RunService:UnbindFromRenderStep("HarukaCutscene")
 
-		camera.CameraType = Enum.CameraType.Scriptable
-		camera.CFrame = workspace:WaitForChild("MapComponents", 999).IntroCutscene["4"].CFrame
+	return signal
+end
 
-		signal:Fire("Completed")
-		signal:Destroy()
+
+function HarukaLib:RichTextify(text: string) : string
+	local colorList = {
+		["<blue>"] = [[<font color="#70a1ff">]],
+		["<purple>"] = [[<font color="#5352ed">]],
+		["<red>"] = [[<font color="#ff4757">]],
+		["<orange>"] = [[<font color="#ffa502">]],
+		["<yellow>"] = [[<font color="#ffda79">]],
+		["<green>"] = [[<font color="#7bed9f">]],
+	}
+
+	for oriTag: string, rbxColorTag: string in colorList do
+		text = string.gsub(text, oriTag, rbxColorTag)
 	end
+
+	return text
+end
+
+
+function HarukaLib:CreateConfirmPrompt(plr: Player, hint: string)
+	local scope = Fusion.scoped({})
+	local signal = Signal.new()
+
+	local initialTrans = Fusion.Value(scope, 1)
+	local initialSize = Fusion.Value(scope, UDim2.fromScale(1, 0))
+	local absTextBGSize = Fusion.Value(scope, Vector2.new())
+
+	Components.ScreenGui(scope, {
+		Name = "ConfirmUI",
+		DisplayOrder = 100,
+		Parent = plr:FindFirstChildOfClass("PlayerGui"),
+
+		[Children] = {
+			Components.Frame(scope, {
+				Name = "BG",
+				BackgroundTransparency = 0,
+
+				Size = Fusion.Tween(scope, Fusion.Computed(scope, function(use: Fusion.Use)
+					return use(initialSize)
+				end), AssetBook.TweenInfos.fourHalf),
+
+				[Children] = {
+					Fusion.New(scope, "UIAspectRatioConstraint")({ AspectRatio = 8.365 }),
+					Components.UIStroke(scope, {
+						Thickness = 3,
+						Enabled = true
+					}),
+
+					Components.TextLabel(scope, {
+						Name = "Hint",
+						AnchorPoint = Vector2.new(0.5, 0),
+						Position = UDim2.fromScale(0.5, 0.1),
+						Size = UDim2.fromScale(0.5, 0.4),
+						TextScaled = false,
+						TextWrapped = true,
+						Text = HarukaLib:RichTextify(hint),
+						RichText = true,
+
+						TextSize = Fusion.Computed(scope, function(use: Fusion.Use)
+							return math.ceil(use(absTextBGSize).Y / 2.47)
+						end),
+
+						[Fusion.Out("AbsoluteSize")] = absTextBGSize,
+					}),
+					Components.Frame(scope, {
+						Name = "BtnsFrame",
+						AnchorPoint = Vector2.new(0.5, 0),
+						Position = UDim2.fromScale(0.5, 0.672),
+						Size = UDim2.fromScale(0.5, 0.186),
+
+						[Children] = {
+							Fusion.New(scope, "UIListLayout")({
+								Padding = UDim.new(0.03, 0),
+								FillDirection = Enum.FillDirection.Horizontal,
+								HorizontalAlignment = Enum.HorizontalAlignment.Center,
+							}),
+
+							Components.TextButton(scope, {
+								Name = "ConfirmBtn",
+								BackgroundColor3 = Color3.new(1, 1, 1),
+								Size = UDim2.fromScale(0.35, 1),
+								Text = "CONFIRM",
+								TextColor3 = Color3.new(),
+
+								[Fusion.OnEvent("MouseButton1Click")] = function()
+									workspace.Sounds.SFXs.Click:Play()
+
+									signal:Fire("Confirmed")
+								end,
+
+								[Children] = {
+									Components.RoundUICorner(scope),
+									Fusion.New(scope, "UIPadding")({
+										PaddingBottom = UDim.new(0.05, 0),
+										PaddingTop = UDim.new(0.05, 0)
+									})
+								}
+							}),
+							Components.TextButton(scope, {
+								Name = "CancelBtn",
+								BackgroundColor3 = Color3.new(),
+								Size = UDim2.fromScale(0.35, 1),
+								Text = "CANCEL",
+
+								[Fusion.OnEvent("MouseButton1Click")] = function()
+									workspace.Sounds.SFXs.Click:Play()
+
+									signal:Fire("Canceled")
+								end,
+
+								[Children] = {
+									Components.RoundUICorner(scope),
+									Components.UIStroke(scope, {
+										Thickness = 2.5,
+										Enabled = true
+									}),
+									Fusion.New(scope, "UIPadding")({
+										PaddingBottom = UDim.new(0.05, 0),
+										PaddingTop = UDim.new(0.05, 0)
+									})
+								}
+							}),
+						}
+					})
+				}
+			}),
+			Components.Frame(scope, {
+				Name = "GlobalShadows",
+				ZIndex = 0,
+				Active = true,
+
+				BackgroundTransparency = Fusion.Tween(scope, Fusion.Computed(scope, function(use: Fusion.Use)
+					return use(initialTrans)
+				end), AssetBook.TweenInfos.onceHalf)
+			})
+		}
+	})
+
+	initialSize:set(UDim2.fromScale(1, 0.3))
+	initialTrans:set(0.3)
+
+	--// clear on close
+	signal:Once(function()
+		Fusion.doCleanup(scope)
+
+		signal:Destroy()
+	end)
 
 	return signal
 end

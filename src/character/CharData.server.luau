@@ -31,10 +31,18 @@ local function setup()
         clonedChar.PrimaryPart = clonedChar:WaitForChild("Humanoid", 999).RootPart
 
         ServerUtil:SetCollisionGroup(clonedChar, "ClonedCharacter")
-        ServerUtil:EquipWeapon(clonedChar, plr:GetAttribute("DATA"..i.."Class"))
+
+        local cosmetic = plr:GetAttribute("DATA"..i.."Cosmetic") :: string
+        local hasCosmetic = if not cosmetic or cosmetic == "None" then false else true
+        if hasCosmetic then
+            ServerUtil:EquipArmor(clonedChar, cosmetic)
+        else
+            ServerUtil:EquipWeapon(clonedChar, plr:GetAttribute("DATA"..i.."Class"))
+        end
 
         clonedChar.Parent = container
 
+        clonedChar:WaitForChild("Animate", 999):Destroy()
         clonedChar:WaitForChild("Humanoid", 999):LoadAnimation(ReplicatedStorage.Package.Animations.NPCIdle):Play()
     end
 end

@@ -6,6 +6,7 @@ local AssetBook = require(RepS.Modules.Data.AssetBook)
 local Components = require(RepS.Modules.UI.Vanilla)
 local Events = require(RepS.Modules.Data.Events)
 local Fusion = require(RepS.Modules.Packages.Fusion)
+local Signals = require(RepS.Modules.Data.Signals)
 
 local Children, New, Computed = Fusion.Children, Fusion.New, Fusion.Computed
 
@@ -17,12 +18,14 @@ local fromRGB = Color3.fromRGB
 local function FriendSlot(info: table, self: table, scope: table) : Frame
     return Components.Frame(scope, {
         Name = Computed(scope, function()
+            if info.IsInCS then return "AAAB-InCS-"..info.UserName end
+
             if AssetBook.friendsStatusColors[info.LocationType] == fromRGB(0, 198, 96) then
-                return "B-InGame-"..info.VisitorId
+                return "B-InGame-"..info.UserName
             elseif AssetBook.friendsStatusColors[info.LocationType] == fromRGB(85, 170, 255) then
-                return "C-Online-"..info.VisitorId
+                return "C-Online-"..info.UserName
             else
-                return "D-Studio-"..info.VisitorId
+                return "D-Studio-"..info.UserName
             end
         end),
         Size = fromScale(0.98, 0.3),
@@ -105,6 +108,8 @@ local function FriendSlot(info: table, self: table, scope: table) : Frame
 
                 [Fusion.OnEvent("MouseButton1Click")] = function()
                     self.isTeleporting:set(true)
+
+                    Signals.CreateFullScreenHint:Fire("TRAVELLING TO CRITICAL WORLDS...", true)
 
                     Events.TeleportPrompt.Fire({
                         Option = "JoinFriend",

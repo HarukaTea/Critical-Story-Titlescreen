@@ -5,6 +5,7 @@ local RepS = game:GetService("ReplicatedStorage")
 local Components = require(RepS.Modules.UI.Vanilla)
 local Events = require(RepS.Modules.Data.Events)
 local Fusion = require(RepS.Modules.Packages.Fusion)
+local Signals = require(RepS.Modules.Data.Signals)
 
 local fromScale = UDim2.fromScale
 local udNew = UDim.new
@@ -31,6 +32,8 @@ local function FriendListFuncButton(id: string, self: table) : TextButton
 
         [Fusion.OnEvent("MouseButton1Click")] = function()
             self.isTeleporting:set(true)
+
+            Signals.CreateFullScreenHint:Fire("TRAVELLING TO CRITICAL WORLDS...", true)
 
             Events.TeleportPrompt.Fire({
                 Option = id,

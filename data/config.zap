@@ -7,8 +7,16 @@ event CreateHint = {
     type: Unreliable,
     call: ManyAsync,
     data: struct {
+        Hint: string(..666)
+    }
+}
+event CreateFullScreenHint = {
+    from: Server,
+    type: Unreliable,
+    call: ManyAsync,
+    data: struct {
         Hint: string(..666),
-        Option: string(..10)?
+        State: boolean
     }
 }
 event DataWipe = {
@@ -18,6 +26,12 @@ event DataWipe = {
     data: struct {
         SlotChosen: string
     }
+}
+event DataTransfer = {
+    from: Client,
+    type: Reliable,
+    call: SingleAsync,
+    data: struct {}
 }
 event TeleportFailed = {
     from: Server,
@@ -31,7 +45,7 @@ event TeleportPrompt = {
     call: SingleAsync,
     data: struct {
         Option: string,
-        PrivateCode: string,
+        PrivateCode: unknown,
         SlotChosen: string
     }
 }

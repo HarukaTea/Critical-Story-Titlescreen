@@ -7,6 +7,7 @@ local AssetBook = require(RepS.Modules.Data.AssetBook)
 local Components = require(RepS.Modules.UI.Vanilla)
 local Events = require(RepS.Modules.Data.Events)
 local Fusion = require(RepS.Modules.Packages.Fusion)
+local HarukaLib = require(RepS.Modules.Packages.HarukaLib)
 local Spawn = require(RepS.Modules.Packages.Spawn)
 local Signals = require(RepS.Modules.Data.Signals)
 
@@ -28,16 +29,17 @@ end
 
 local function SaveSlot(index: number, self: table) : Frame
     local scope = self.scope :: table
-    local plr = self.plr :: Player
 
-    local eraseConfirmed = 10
+    local eraseStage = 1
 
     self.charSelfViews[index] = Fusion.Value(scope, New(scope, "ViewportFrame")({
         BackgroundTransparency = 1,
         Position = fromScale(0.076, 0.221),
         Size = fromScale(0.877, 0.583),
 
-        Visible = if plr:GetAttribute("DATA"..index.."PlayTime") > 0 then true else false,
+        Visible = Computed(scope, function(use: Fusion.Use)
+            return if use(self.playerData["Slot"..index].PlayTime) > 0 then true else false
+        end),
 
         [Children] = {
             New(scope, "Camera")({})
@@ -77,9 +79,13 @@ local function SaveSlot(index: number, self: table) : Frame
                 Name = "Class",
                 Position = fromScale(0.825, 0.018),
                 Size = fromScale(0.128, 0.1),
-                Image = AssetBook.Class[plr:GetAttribute("DATA"..index.."Class") or "Warrior"],
 
-                Visible = if plr:GetAttribute("DATA"..index.."PlayTime") > 0 then true else false
+                Image = Computed(scope, function(use: Fusion.Use)
+                    return AssetBook.Class[use(self.playerData["Slot"..index].Class) or ""]
+                end),
+                Visible = Computed(scope, function(use: Fusion.Use)
+                    return if use(self.playerData["Slot"..index].PlayTime) > 0 then true else false
+                end)
             }),
             Components.TextButton(scope, {
                 Name = "Erase",
@@ -90,23 +96,27 @@ local function SaveSlot(index: number, self: table) : Frame
                 BackgroundColor3 = fromRGB(216, 72, 108),
                 ZIndex = 5,
 
-                Visible = Computed(scope, function(use)
-                    return if plr:GetAttribute("DATA"..index.."PlayTime") <= 0 then false else use(self.saveSlotEraseVisible[index])
+                Visible = Computed(scope, function(use: Fusion.Use)
+                    return if use(self.playerData["Slot"..index].PlayTime) > 0 then use(self.saveSlotEraseVisible[index]) else false
                 end),
 
                 [Fusion.OnEvent("MouseButton1Click")] = function()
                     workspace.Sounds.SFXs.Click:Play()
 
-                    if eraseConfirmed > 0 then
-                        eraseConfirmed -= 1
+                    if eraseStage == 1 then
+                        local action = HarukaLib:CreateConfirmPrompt(self.plr, "Are you sure you want to erase your data?"):Wait()
 
-                        Signals.CreateHint:Fire("Click "..eraseConfirmed.." times more to confirm your action!")
-                        return
-                    else
-                        Signals.CreateHint:Fire("Erasing your data...")
+                        if action == "Confirmed" then
+                            local action2 = HarukaLib:CreateConfirmPrompt(self.plr, "Are you ABSOLUTELY sure you want to erase your data?"):Wait()
 
-                        wait(1)
-                        Events.DataWipe.Fire({ SlotChosen = "Slot"..index })
+                            if action2 == "Confirmed" then
+                                eraseStage = 2
+
+                                Signals.CreateHint:Fire("Erasing your data...")
+
+                                Events.DataWipe.Fire({ SlotChosen = "Slot"..index })
+                            end
+                        end
                     end
                 end,
 
@@ -116,11 +126,15 @@ local function SaveSlot(index: number, self: table) : Frame
                 Name = "Levels",
                 Position = fromScale(0, 0.13),
                 Size = fromScale(1, 0.06),
-                Text = "Lv."..plr:GetAttribute("DATA"..index.."Levels") or 1,
                 TextXAlignment = Enum.TextXAlignment.Left,
                 TextColor3 = fromRGB(255, 255, 127),
 
-                Visible = if plr:GetAttribute("DATA"..index.."PlayTime") > 0 then true else false,
+                Text = Computed(scope, function(use: Fusion.Use)
+                    return `Lv.{use(self.playerData["Slot"..index].Levels)}`
+                end),
+                Visible = Computed(scope, function(use: Fusion.Use)
+                    return if use(self.playerData["Slot"..index].PlayTime) > 0 then true else false
+                end),
 
                 [Children] = { UIPadding(scope) }
             }),
@@ -128,11 +142,17 @@ local function SaveSlot(index: number, self: table) : Frame
                 Name = "PlayTime",
                 Position = fromScale(0, 0.13),
                 Size = fromScale(1, 0.06),
-                Text = format("%.1f", tostring(plr:GetAttribute("DATA"..index.."PlayTime") / 3600) or 0).." Hours",
                 TextXAlignment = Enum.TextXAlignment.Right,
                 TextColor3 = fromRGB(255, 255, 127),
 
-                Visible = if plr:GetAttribute("DATA"..index.."PlayTime") > 0 then true else false,
+                Text = Computed(scope, function(use: Fusion.Use)
+                    local formatedTime = format("%.2f", tostring(use(self.playerData["Slot"..index].PlayTime) / 3600) or 0)
+
+                    return `{formatedTime} Hours`
+                end),
+                Visible = Computed(scope, function(use: Fusion.Use)
+                    return if use(self.playerData["Slot"..index].PlayTime) > 0 then true else false
+                end),
 
                 [Children] = { UIPadding(scope) }
             }),
@@ -140,11 +160,17 @@ local function SaveSlot(index: number, self: table) : Frame
                 Name = "StoryProgress",
                 Position = fromScale(0, 0.831),
                 Size = fromScale(1, 0.06),
-                Text = "Progress: "..AssetBook.StorySeries[plr:GetAttribute("DATA"..index.."StoryId") or 1],
                 TextXAlignment = Enum.TextXAlignment.Left,
                 TextColor3 = fromRGB(170, 255, 255),
 
-                Visible = if plr:GetAttribute("DATA"..index.."PlayTime") > 0 then true else false,
+                Text = Computed(scope, function(use: Fusion.Use)
+                    local progress = AssetBook.StorySeries[use(self.playerData["Slot"..index].StoryId)] or ""
+
+                    return `Progress: {progress}`
+                end),
+                Visible = Computed(scope, function(use: Fusion.Use)
+                    return if use(self.playerData["Slot"..index].PlayTime) > 0 then true else false
+                end),
 
                 [Children] = { UIPadding(scope) }
             }),
@@ -152,11 +178,17 @@ local function SaveSlot(index: number, self: table) : Frame
                 Name = "LastSeen",
                 Position = fromScale(0, 0.9),
                 Size = fromScale(1, 0.06),
-                Text = "Last Seen: "..AssetBook.LocationInfo[plr:GetAttribute("DATA"..index.."LastSeenLocation") or "MonolithVillage"],
                 TextXAlignment = Enum.TextXAlignment.Left,
                 TextColor3 = fromRGB(255, 170, 127),
 
-                Visible = if plr:GetAttribute("DATA"..index.."PlayTime") > 0 then true else false,
+                Text = Computed(scope, function(use: Fusion.Use)
+                    local lastSeen = AssetBook.LocationInfo[use(self.playerData["Slot"..index].LastSeen)] or ""
+
+                    return `Last Seen: {lastSeen}`
+                end),
+                Visible = Computed(scope, function(use: Fusion.Use)
+                    return if use(self.playerData["Slot"..index].PlayTime) > 0 then true else false
+                end),
 
                 [Children] = { UIPadding(scope) }
             }),
@@ -168,7 +200,9 @@ local function SaveSlot(index: number, self: table) : Frame
                 Text = "EMPTY",
                 TextColor3 = fromRGB(136, 136, 136),
 
-                Visible = if plr:GetAttribute("DATA"..index.."PlayTime") > 0 then false else true,
+                Visible = Computed(scope, function(use: Fusion.Use)
+                    return if use(self.playerData["Slot"..index].PlayTime) > 0 then false else true
+                end)
             }),
 
             self.charSelfViews[index],
