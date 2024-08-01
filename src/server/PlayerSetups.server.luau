@@ -46,18 +46,22 @@ local function setup(plr: Player)
 			local dataTransfered = plr:GetJoinData().TeleportData :: table
 
 			--- decomplie data
-			Promise.new(function()
-				for i = 1, 3 do
-					keep.Data["Slot"..i].Stats.PlayTime = dataTransfered["Slot"..i] or 0
-				end
+			if dataTransfered.Slot1 then --- if it's nil then it's not a transfered data
+				Promise.new(function()
+					for i = 1, 3 do
+						keep.Data["Slot"..i].Stats.PlayTime = dataTransfered["Slot"..i]
 
-				keep:Save():await()
+						print(`[{plr.UserId}]: {dataTransfered["Slot"..i]}`)
+					end
 
-			end):catch(function(msg)
-				plr:Kick("A error occured when transfering data, please try again later?")
+					keep:Save():await()
 
-				warn(`[DATA TRANSFER]: {msg}`)
-			end)
+				end):catch(function(msg)
+					plr:Kick("A error occured when transfering data, please try again later?")
+
+					warn(`[DATA TRANSFER]: {msg}`)
+				end)
+			end
 		end
 
 		for i = 1, 3 do
