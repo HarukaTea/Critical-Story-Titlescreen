@@ -26,6 +26,11 @@ local function setup(plr: Player)
 		profile:Reconcile()
 		profile:AddUserId(plr.UserId)
 
+		profile:ListenToRelease(function()
+			profiles[plr] = nil
+			plr:Kick("Data was loaded on another roblox server, please try again later?")
+		end)
+
 		if not plr:IsDescendantOf(Players) then
 			profile:Release()
 			return

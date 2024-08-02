@@ -24,7 +24,13 @@ Events.TeleportPrompt.SetCallback(function(plr, data)
 			local slotChosen = tonumber(string.match(dataChosen, "%d"))
 			local lastSeenWorld = plr:GetAttribute("DATA"..slotChosen.."LastSeenWorld") :: string
 
-			TeleportService:TeleportAsync(lastSeenWorld, { plr }, teleportOptions)
+			if plr:GetAttribute("_WORLD_UNLOCK_"..lastSeenWorld) == true then
+				TeleportService:TeleportAsync(lastSeenWorld, { plr }, teleportOptions)
+			else
+				Events.TeleportFailed.Fire(plr, {})
+				Events.CreateHint.Fire(plr, { Hint = "You haven't unlocked this world yet!" })
+				Events.CreateFullScreenHint.Fire(plr, { Hint = "", State = false })
+			end
 
 		end):catch(function(err)
 			warn(`[Public Teleport]: {err}`)
@@ -116,4 +122,5 @@ end)
 TeleportService.TeleportInitFailed:Connect(function(plr: Player)
 	Events.TeleportFailed.Fire(plr, {})
 	Events.CreateHint.Fire(plr, { Hint = "Teleport failed!" })
+	Events.CreateFullScreenHint.Fire(plr, { Hint = "", State = false })
 end)
