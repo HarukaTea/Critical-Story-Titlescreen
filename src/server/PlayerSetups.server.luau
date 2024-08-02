@@ -4,38 +4,34 @@ local Players = game:GetService("Players")
 local RepS = game:GetService("ReplicatedStorage")
 local SSS = game:GetService("ServerScriptService")
 
-local DataKeep = require(RepS.Modules.Packages.DataKeep)
 local Events = require(SSS.Modules.Data.ServerEvents)
 local HarukaLib = require(RepS.Modules.Packages.HarukaLib)
 local Promise = require(RepS.Modules.Packages.Promise)
+local ProfileService = require(RepS.Modules.Packages.ProfileService)
 local Spawn = require(RepS.Modules.Packages.Spawn)
 
 local profiles = {}
 
 local TEMPLATE = require(SSS.Modules.Data.PlayerTemplate)
 
-local dataKeepStore = DataKeep.GetStore("CS_1599MKK40_VCA_TEST", TEMPLATE)
+local profileStore = ProfileService.GetProfileStore("CS_1599MKK40_VCA_TEST", TEMPLATE)
 
 local function setup(plr: Player)
-	dataKeepStore:LoadKeep("Player_"..plr.UserId, function()
-		plr:Kick("Data is locked, maybe try again later?")
+	Promise.new(function(resolve, reject)
+		local profile = profileStore:LoadProfileAsync("Player_"..plr.UserId)
 
-		return dataKeepStore.LoadMethods.Cancel
+		if profile then resolve(profile) else reject("Profile is nil") end
 
-	end):andThen(function(keep)
-		if keep == nil then
-			plr:Kick("Data is locked, maybe try again later?")
-		end
-
-		keep:Reconcile()
-		keep:AddUserId(plr.UserId)
+	end):andThen(function(profile)
+		profile:Reconcile()
+		profile:AddUserId(plr.UserId)
 
 		if not plr:IsDescendantOf(Players) then
-			keep:Release()
+			profile:Release()
 			return
 		end
 
-		profiles[plr] = keep
+		profiles[plr] = profile
 		print("Loaded data for player: "..plr.UserId)
 
 		--// check from
@@ -49,12 +45,10 @@ local function setup(plr: Player)
 			if dataTransfered.Slot1 then --- if it's nil then it's not a transfered data
 				Promise.new(function()
 					for i = 1, 3 do
-						keep.Data["Slot"..i].Stats.PlayTime = dataTransfered["Slot"..i]
+						profile.Data["Slot"..i].Stats.PlayTime = dataTransfered["Slot"..i]
 
 						print(`[{plr.UserId}]: {dataTransfered["Slot"..i]}`)
 					end
-
-					keep:Save():await()
 
 				end):catch(function(msg)
 					plr:Kick("A error occured when transfering data, please try again later?")
@@ -65,11 +59,11 @@ local function setup(plr: Player)
 		end
 
 		for i = 1, 3 do
-			for attr: string, val: any in keep.Data["Slot"..i].Stats do
+			for attr: string, val: any in profile.Data["Slot"..i].Stats do
 				plr:SetAttribute("DATA"..i..""..attr, HarukaLib:Deserialize(val))
 			end
 
-			plr:SetAttribute("DATA"..i.."StoryId", keep.Data["Slot"..i].Quests.Main)
+			plr:SetAttribute("DATA"..i.."StoryId", profile.Data["Slot"..i].Quests.Main)
 			plr:SetAttribute("PlayerDataLoaded"..i, true)
 		end
 
@@ -79,41 +73,35 @@ local function setup(plr: Player)
 		warn(`[DATA LOAD]: {msg}`)
 	end)
 end
-
-dataKeepStore:andThen(function(store)
-	dataKeepStore = store
-
-	for _, player: Player in Players:GetPlayers() do
-		Spawn(setup, player)
-	end
-	Players.PlayerAdded:Connect(setup)
-end)
-
 local function clear(plr: Player)
-	local keep = profiles[plr]
+	local profile = profiles[plr]
 
 	--- profile cleanups
-	if keep then
+	if profile then
 		profiles[plr] = nil
 
-		keep:Save():await()
-		keep:Release()
+		profile:Release()
 	end
 
 	--- clear world existence
 	local playerChars = workspace.MapComponents.PlayerChars :: Folder
 	if playerChars:FindFirstChild(plr.Name) then playerChars[plr.Name]:Destroy() end
 end
+
+for _, player: Player in Players:GetPlayers() do
+	Spawn(setup, player)
+end
+Players.PlayerAdded:Connect(setup)
 Players.PlayerRemoving:Connect(clear)
 
 
 Events.DataWipe.SetCallback(function(plr, data)
 	local slot = data.SlotChosen
-	local keep = profiles[plr]
+	local profile = profiles[plr]
 
 	-- wipe
 	Promise.new(function()
-		if not keep.Data[slot] then
+		if not profile.Data[slot] then
 			Events.CreateHint.Fire(plr, { Hint = "Error occured when resetting your data!" })
 			return
 		end
@@ -121,8 +109,7 @@ Events.DataWipe.SetCallback(function(plr, data)
 		Events.CreateFullScreenHint.Fire(plr, { Hint = "WIPING DATA, PLEASE WAIT...", State = true })
 
 		task.wait(1.599)
-		keep.Data[slot] = TEMPLATE.Slot1
-		keep:Save():await()
+		profile.Data[slot] = TEMPLATE.Slot1
 
 	end):catch(function(msg)
 		warn(`[DATA WIPE]: {msg}`)
@@ -138,11 +125,11 @@ Events.DataWipe.SetCallback(function(plr, data)
 
 		task.wait(1)
 		for i = 1, 3 do
-			for attr: string, val: any in keep.Data["Slot"..i].Stats do
+			for attr: string, val: any in profile.Data["Slot"..i].Stats do
 				plr:SetAttribute("DATA"..i..""..attr, HarukaLib:Deserialize(val))
 			end
 
-			plr:SetAttribute("DATA"..i.."StoryId", keep.Data["Slot"..i].Quests.Main)
+			plr:SetAttribute("DATA"..i.."StoryId", profile.Data["Slot"..i].Quests.Main)
 		end
 
 		task.wait(1)

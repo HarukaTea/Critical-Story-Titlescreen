@@ -107,7 +107,7 @@ local function SaveSlot(index: number, self: table) : Frame
                         local action = HarukaLib:CreateConfirmPrompt(self.plr, "Are you sure you want to erase your data?"):Wait()
 
                         if action == "Confirmed" then
-                            local action2 = HarukaLib:CreateConfirmPrompt(self.plr, "Are you ABSOLUTELY sure you want to erase your data?"):Wait()
+                            local action2 = HarukaLib:CreateConfirmPrompt(self.plr, "Are you <yellow>ABSOLUTELY</font> sure you want to erase your data?"):Wait()
 
                             if action2 == "Confirmed" then
                                 eraseStage = 2

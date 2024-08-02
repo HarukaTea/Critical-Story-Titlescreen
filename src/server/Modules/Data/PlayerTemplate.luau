@@ -29,9 +29,9 @@ local slotStats = {
 		},
 
 		Inventory = {},
-		ClassUnlocks = {
-			Warrior = true
-		}
+
+		ClassUnlocks = { Warrior = true	},
+		WorldUnlocks = { Mainworld = true }
 	}
 }
 slotStats.Slot2 = slotStats.Slot1
