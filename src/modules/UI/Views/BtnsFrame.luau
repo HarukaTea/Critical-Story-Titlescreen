@@ -53,6 +53,8 @@ local function BtnsFrame(self: table) : Frame
 
                         self.isChoosingSaveSlot:set(false)
                         self.friendFramePos:set(fromScale(1.5, -0.7))
+                        self.worldListFrameVisible:set(false)
+                        self.friendListFrameVisible:set(true)
 
                         self.currentUI:set("SaveSlot")
 

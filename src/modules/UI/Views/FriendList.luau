@@ -18,13 +18,18 @@ local fromRGB = Color3.fromRGB
 local upper = string.upper
 
 
-local function _checkIsInCS(placeId: number) : boolean
-    local found = false
-    for _, world: number in AssetBook.WorldInfo do
-        if placeId == world then found = true break end
+local function _checkIsInCS(placeId: number) : (boolean, string)
+    local found, currentWorld = false, "None"
+
+    for worldId: string, world: number in AssetBook.WorldInfo do
+        if placeId == world then
+            found = true
+            currentWorld = worldId
+            break
+        end
     end
 
-    return found
+    return found, currentWorld
 end
 
 local function FriendList(self: table) : Frame
@@ -59,10 +64,12 @@ local function FriendList(self: table) : Frame
             }),
 
             Fusion.ForValues(scope, self.friends, function(_, localScope: table, info: table)
-                local found = _checkIsInCS(info.PlaceId)
+                local found, worldId = _checkIsInCS(info.PlaceId)
 
                 if found then
                     info.IsInCS = true
+                    info.LastLocation = `Exploring {worldId}`
+
                     return FriendSlot(info, self, localScope)
                 end
 
@@ -96,7 +103,8 @@ local function FriendList(self: table) : Frame
             return use(self.friendFramePos)
         end), AssetBook.TweenInfos.twiceHalfOne),
         Visible = Computed(scope, function(use)
-            return not use(self.isTeleporting)
+            if use(self.isTeleporting) == true then return false
+            else return use(self.friendListFrameVisible) end
         end),
 
         [Fusion.Out("AbsoluteSize")] = self.friendsAbsSize,

@@ -1,6 +1,8 @@
 --!nocheck
 
+local MarketplaceService = game:GetService("MarketplaceService")
 local MessagingService = game:GetService("MessagingService")
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local TeleportService = game:GetService("TeleportService")
@@ -19,17 +21,17 @@ Events.TeleportPrompt.SetCallback(function(plr, data)
 	teleportOptions:SetTeleportData({ dataChosen })
 
 	if option == "JoinPublic" then
-		task.wait(0.5)
+		task.wait(1)
 		Promise.new(function()
 			local slotChosen = tonumber(string.match(dataChosen, "%d"))
 			local lastSeenWorld = plr:GetAttribute("DATA"..slotChosen.."LastSeenWorld") :: string
 
-			if plr:GetAttribute("_WORLD_UNLOCK_"..lastSeenWorld) == true then
-				TeleportService:TeleportAsync(lastSeenWorld, { plr }, teleportOptions)
+			if plr:GetAttribute("DATA"..slotChosen.."_WORLD_UNLOCK_"..lastSeenWorld) == true then
+				TeleportService:TeleportAsync(AssetBook.WorldInfo[lastSeenWorld], { plr }, teleportOptions)
+
 			else
 				Events.TeleportFailed.Fire(plr, {})
 				Events.CreateHint.Fire(plr, { Hint = "You haven't unlocked this world yet!" })
-				Events.CreateFullScreenHint.Fire(plr, { Hint = "", State = false })
 			end
 
 		end):catch(function(err)
@@ -39,14 +41,27 @@ Events.TeleportPrompt.SetCallback(function(plr, data)
 		end)
 
 	elseif option == "CreatePrivate" then
-		task.wait(0.5)
+		task.wait(1)
 		Promise.new(function()
-			local code = TeleportService:ReserveServer(WORLDS.Mainworld)
+			local ownGamepass = MarketplaceService:UserOwnsGamePassAsync(plr.UserId, 881563847)
+			local rank = plr:GetRankInGroup(16912246)
 
-			teleportOptions.ReservedServerAccessCode = code
-			teleportOptions:SetTeleportData({ dataChosen, code })
+			if ownGamepass == true or plr:GetAttribute("OwnGamepassLocal") == true or rank >= 125 then
+				local worldChosen = privateCode
+				local worldId = AssetBook.WorldInfo[worldChosen]
+				local code = TeleportService:ReserveServer(worldId)
 
-			TeleportService:TeleportAsync(WORLDS.Mainworld, { plr }, teleportOptions)
+				teleportOptions.ReservedServerAccessCode = code
+				teleportOptions:SetTeleportData({ dataChosen, code })
+
+				TeleportService:TeleportAsync(worldId, { plr }, teleportOptions)
+
+			else
+				MarketplaceService:PromptGamePassPurchase(plr, 881563847)
+
+				Events.CreateHint.Fire(plr, { Hint = "You need to own gamepass to create a private server!" })
+				Events.TeleportFailed.Fire(plr, {})
+			end
 
 		end):catch(function(err)
 			Events.TeleportFailed.Fire(plr, {})
@@ -71,9 +86,11 @@ Events.TeleportPrompt.SetCallback(function(plr, data)
 
 		connection = MessagingService:SubscribeAsync("JoinPrivateCheck", function(message: table)
 			if message.Data[1] == privateCode then
+				local serverWorld = message.Data[3] :: string
+
 				teleportOptions.ReservedServerAccessCode = message.Data[2]
 
-				TeleportService:TeleportAsync(WORLDS.Mainworld, { plr }, teleportOptions)
+				TeleportService:TeleportAsync(AssetBook.WorldInfo[serverWorld], { plr }, teleportOptions)
 
 				connection:Disconnect()
 			end
@@ -96,13 +113,21 @@ Events.TeleportPrompt.SetCallback(function(plr, data)
 		end)
 
 		connection = MessagingService:SubscribeAsync("JoinFriendReturn", function(message: table)
-			local placeId = message.Data[3] :: number
-			if placeId ~= AssetBook.WorldInfo.Mainworld then return end
+			local slotChosen = tonumber(string.match(dataChosen, "%d"))
+			local serverWorld = message.Data[3] :: string
+
+			if not plr:GetAttribute("DATA"..slotChosen.."_WORLD_UNLOCK_"..serverWorld) then
+				Events.TeleportFailed.Fire(plr, {})
+				Events.CreateHint.Fire(plr, { Hint = "You haven't unlocked this world yet!" })
+
+				connection:Disconnect()
+				return
+			end
 
 			if message.Data[1] == visitorId then
 				teleportOptions.ServerInstanceId = message.Data[2]
 
-				TeleportService:TeleportAsync(message.Data[3], { plr }, teleportOptions)
+				TeleportService:TeleportAsync(AssetBook.WorldInfo[serverWorld], { plr }, teleportOptions)
 
 				connection:Disconnect()
 			end
@@ -122,5 +147,12 @@ end)
 TeleportService.TeleportInitFailed:Connect(function(plr: Player)
 	Events.TeleportFailed.Fire(plr, {})
 	Events.CreateHint.Fire(plr, { Hint = "Teleport failed!" })
-	Events.CreateFullScreenHint.Fire(plr, { Hint = "", State = false })
+end)
+
+
+--// Local gamepass, ignore caching behavior of marketplace service
+MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(plr: Player, gamepassId: number, success: boolean)
+	if gamepassId == 881563847 and success == true and plr:IsDescendantOf(Players) then
+		plr:SetAttribute("OwnGamepassLocal", true)
+	end
 end)

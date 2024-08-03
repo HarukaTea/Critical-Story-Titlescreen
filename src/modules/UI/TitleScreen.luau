@@ -19,6 +19,7 @@ local TitleScreenPinia = require(RepS.Modules.UI.Pinia.TitleScreenPinia)
 
 local BtnsFrame = require(RepS.Modules.UI.Views.BtnsFrame)
 local FriendListFrame = require(RepS.Modules.UI.Views.FriendList)
+local WorldListFrame = require(RepS.Modules.UI.Views.WorldList)
 
 local SaveSlot = require(RepS.Modules.UI.Components.SaveSlot)
 
@@ -137,7 +138,7 @@ return function(plr: Player)
 
 							local action = HarukaLib:CreateConfirmPrompt(
 								plr,
-								[[<yellow>NOTE:</font> This will teleport you to the legacy game, AND you <yellow>CAN ONLY TRANSFER</font> your play time, doing so will <yellow>OVERRIDE</font> your current one.]]
+								[[<yellow>NOTE:</font> This will teleport you to LEGACY. Be aware that you <yellow>CAN ONLY TRANSFER</font> your play time, doing so will <yellow>OVERRIDE</font> your current progress.]]
 							):Wait()
 
 							if action == "Confirmed" then
@@ -210,6 +211,7 @@ return function(plr: Player)
 					}),
 
 					FriendListFrame(self),
+					WorldListFrame(self)
 				},
 			})
 		},

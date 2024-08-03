@@ -47,7 +47,7 @@ local function setup(plr: Player)
 			local dataTransfered = plr:GetJoinData().TeleportData :: table
 
 			--- decomplie data
-			if dataTransfered.Slot1 then --- if it's nil then it's not a transfered data
+			if dataTransfered and dataTransfered.Slot1 then --- if it's nil then it's not a transfered data
 				Promise.new(function()
 					for i = 1, 3 do
 						profile.Data["Slot"..i].Stats.PlayTime = dataTransfered["Slot"..i]
@@ -66,6 +66,9 @@ local function setup(plr: Player)
 		for i = 1, 3 do
 			for attr: string, val: any in profile.Data["Slot"..i].Stats do
 				plr:SetAttribute("DATA"..i..""..attr, HarukaLib:Deserialize(val))
+			end
+			for world: string, val: boolean in profile.Data["Slot"..i].WorldUnlocks do
+				plr:SetAttribute("DATA"..i.."_WORLD_UNLOCK_"..world, val)
 			end
 
 			plr:SetAttribute("DATA"..i.."StoryId", profile.Data["Slot"..i].Quests.Main)
@@ -114,7 +117,12 @@ Events.DataWipe.SetCallback(function(plr, data)
 		Events.CreateFullScreenHint.Fire(plr, { Hint = "WIPING DATA, PLEASE WAIT...", State = true })
 
 		task.wait(1.599)
+		local previousOwned = profile.Data[slot].GamepassOwned :: table
+		local previousDonation = profile.Data[slot].Donation :: number
+
 		profile.Data[slot] = TEMPLATE.Slot1
+		profile.Data[slot].GamepassOwned = previousOwned
+		profile.Data[slot].Donation = previousDonation
 
 	end):catch(function(msg)
 		warn(`[DATA WIPE]: {msg}`)

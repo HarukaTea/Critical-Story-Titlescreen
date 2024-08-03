@@ -31,6 +31,14 @@ local function FriendListFuncButton(id: string, self: table) : TextButton
         BackgroundColor3 = colors[id],
 
         [Fusion.OnEvent("MouseButton1Click")] = function()
+            workspace.Sounds.SFXs.Click:Play()
+
+            if id == "CreatePrivate" then
+                self.friendListFrameVisible:set(false)
+                self.worldListFrameVisible:set(true)
+                return
+            end
+
             self.isTeleporting:set(true)
 
             Signals.CreateFullScreenHint:Fire("TRAVELLING TO CRITICAL WORLDS...", true)
@@ -40,8 +48,6 @@ local function FriendListFuncButton(id: string, self: table) : TextButton
                 PrivateCode = Fusion.peek(self.privateCode),
                 SlotChosen = self.slotChosen
             })
-
-            workspace.Sounds.SFXs.Click:Play()
         end,
 
         [Fusion.Children] = {

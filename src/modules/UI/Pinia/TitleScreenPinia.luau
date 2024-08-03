@@ -41,11 +41,15 @@ local function TitleScreenPinia(self: table)
     self.saveSlotEraseVisible = { Value(false), Value(false), Value(false) }
 
     self.friendListFrame = Value()
+    self.friendListFrameVisible = Value(true)
     self.friendsRequestCD = false
     self.friendFramePos = Value(fromScale(1.5, -0.7))
     self.friends = Value({})
     self.friendsAbsContentSize, self.friendsAbsSize = Value(Vector2.new()), Value(Vector2.new())
     self.privateCode = Value("")
+
+    self.worldListFrameVisible = Value(false)
+    self.worldListAbsSize, self.worldListAbsContentSize = Value(Vector2.new()), Value(Vector2.new())
 
     self.isTeleporting = Value(false)
 end

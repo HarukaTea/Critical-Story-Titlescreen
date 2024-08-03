@@ -92,6 +92,10 @@ AssetBook.WorldInfo = {
 	Everfrost = 18331688502, Stronghold = 18331688973, Arkus = 18331795211, LoneTown = 18331808756,
 	SummerIsland = 18331781219, StrikeWorld = 18331860434
 }
+AssetBook.TeleportWorldInfo = {
+    Mainworld = "MAIN WORLD",
+    Stronghold = "NORTHERN STRONGHOLD"
+}
 
 AssetBook.StorySeries = {
     "The Beginning",

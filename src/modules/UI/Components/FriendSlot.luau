@@ -16,14 +16,18 @@ local udNew = UDim.new
 local fromRGB = Color3.fromRGB
 
 local function FriendSlot(info: table, self: table, scope: table) : Frame
+    local isSelecting = Fusion.Value(scope, false)
+
     return Components.Frame(scope, {
         Name = Computed(scope, function()
             if info.IsInCS then return "AAAB-InCS-"..info.UserName end
 
             if AssetBook.friendsStatusColors[info.LocationType] == fromRGB(0, 198, 96) then
                 return "B-InGame-"..info.UserName
+
             elseif AssetBook.friendsStatusColors[info.LocationType] == fromRGB(85, 170, 255) then
                 return "C-Online-"..info.UserName
+
             else
                 return "D-Studio-"..info.UserName
             end
@@ -38,6 +42,15 @@ local function FriendSlot(info: table, self: table, scope: table) : Frame
         [Children] = {
             New(scope, "UIAspectRatioConstraint")({ AspectRatio = 11.245 }),
             New(scope, "UICorner")({ CornerRadius = udNew(0.1, 0) }),
+
+            Components.UIStroke(scope, {
+                Thickness = 2.5,
+                Enabled = true,
+
+                Transparency = Fusion.Tween(scope, Fusion.Computed(scope, function(use: Fusion.Use)
+                    return if use(isSelecting) then 0.3 else 1
+                end), AssetBook.TweenInfos.twiceHalf)
+            }),
 
             Components.ImageLabel(scope, {
                 Name = "Avatar",
@@ -87,6 +100,15 @@ local function FriendSlot(info: table, self: table, scope: table) : Frame
                 Text = info.LastLocation,
                 TextXAlignment = Enum.TextXAlignment.Left,
                 TextColor3 = AssetBook.friendsStatusColors[info.LocationType],
+            }),
+
+            Components.HoverImageButton(scope, {
+                [Fusion.OnEvent("MouseEnter")] = function()
+                    isSelecting:set(true)
+                end,
+                [Fusion.OnEvent("MouseLeave")] = function()
+                    isSelecting:set(false)
+                end
             }),
 
             Components.TextButton(scope, {

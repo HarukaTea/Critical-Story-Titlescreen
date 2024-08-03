@@ -28,6 +28,9 @@ local slotStats = {
 			Town = {}
 		},
 
+		GamepassOwned = {},
+		Donation = 0,
+
 		Inventory = {},
 
 		ClassUnlocks = { Warrior = true	},
